@@ -3,6 +3,7 @@ import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { resolve } from "path";
 import { TypeOrmConfig } from "src/config/typeorm.config";
+import { UserModule } from "../user/user.module";
 
 @Module({
 	imports: [
@@ -14,6 +15,9 @@ import { TypeOrmConfig } from "src/config/typeorm.config";
 
 		/** Load TypeOrm configs and stablish database connection */
 		TypeOrmModule.forRoot(TypeOrmConfig()),
+
+		/** Load modules */
+		UserModule,
 	],
 	controllers: [],
 	providers: [],
