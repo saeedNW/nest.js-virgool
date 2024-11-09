@@ -1,6 +1,8 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { TypeOrmModule } from "@nestjs/typeorm";
 import { resolve } from "path";
+import { TypeOrmConfig } from "src/config/typeorm.config";
 
 @Module({
 	imports: [
@@ -9,6 +11,9 @@ import { resolve } from "path";
 			envFilePath: resolve(".env"),
 			isGlobal: true,
 		}),
+
+		/** Load TypeOrm configs and stablish database connection */
+		TypeOrmModule.forRoot(TypeOrmConfig()),
 	],
 	controllers: [],
 	providers: [],
