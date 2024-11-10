@@ -5,6 +5,7 @@ import {
 	NestInterceptor,
 } from "@nestjs/common";
 import { map } from "rxjs";
+import { successMessage } from "../enums/messages.enum";
 
 /**
  * Implement custom response logic for server responses.
@@ -34,7 +35,7 @@ export class ResponseTransformerInterceptor implements NestInterceptor {
 				}
 
 				/** Define a default response message for the case if the response was a data object */
-				let message: string = "Process ended successfully";
+				let message: string = successMessage.Default;
 
 				/** Check if the data is and object with a message property */
 				if (typeof data === "object" && "message" in data) {

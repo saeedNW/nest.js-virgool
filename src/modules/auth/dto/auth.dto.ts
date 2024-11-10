@@ -3,6 +3,7 @@ import { Expose } from "class-transformer";
 import { AuthType } from "../enums/type.enum";
 import { IsEnum, IsString, Length } from "class-validator";
 import { AuthMethod } from "../enums/method.enum";
+import { ValidationMessage } from "src/common/enums/messages.enum";
 
 /**
  * User authentication process DTO
@@ -10,7 +11,7 @@ import { AuthMethod } from "../enums/method.enum";
 export class AuthDto {
 	@ApiProperty() //? Make the field accessible in swagger ui
 	@IsString()
-	@Length(3, 30, { message: "username length should be 3 to 30 characters" })
+	@Length(3, 60, { message: ValidationMessage.UsernameLength })
 	@Expose()
 	username: string;
 	/**
@@ -18,18 +19,18 @@ export class AuthDto {
 	 */
 
 	@ApiProperty({ enum: AuthType }) //? Make the field accessible in swagger ui
-	@IsEnum(AuthType, { message: "Invalid auth type" })
+	@IsEnum(AuthType, { message: ValidationMessage.InvalidAuthType })
 	@Expose()
-	type: string;
+	type: AuthType;
 	/**
-	 * The authentication type specifies whether the user is trying to log in or sign up.
+	 * The authentication type specifies whether the user is trying to log in or register.
 	 * It should be a string of predefined enums [login, register]
 	 */
 
 	@ApiProperty({ enum: AuthMethod }) //? Make the field accessible in swagger ui
-	@IsEnum(AuthMethod, { message: "Invalid auth method" })
+	@IsEnum(AuthMethod, { message: ValidationMessage.InvalidAuthMethod })
 	@Expose()
-	method: string;
+	method: AuthMethod;
 	/**
 	 * The authentication method define which option is user using in order to login
 	 * or register into the system. It should be a string of predefined enums
