@@ -18,5 +18,8 @@ namespace NodeJS {
 		DB_USERNAME: string; // Database username
 		DB_PASSWORD: string; // Database password
 		DB_HOST: string; // Database host address
+
+		/** Secrets */
+		COOKIE_SECRET: string;
 	}
 }

@@ -4,6 +4,7 @@ import { HttpExceptionFilter } from "./common/Filters/exception.filter";
 import { UnprocessableEntityPipe } from "./common/pipe/unprocessable-entity.pipe";
 import { ResponseTransformerInterceptor } from "./common/interceptor/response-transformer.interceptor";
 import { swaggerConfiguration } from "./config/swagger.config";
+import * as cookieParser from "cookie-parser";
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
@@ -16,6 +17,9 @@ async function bootstrap() {
 
 	/** initialize custom response interceptor */
 	app.useGlobalInterceptors(new ResponseTransformerInterceptor());
+
+	/** Initialize cookie parser */
+	app.use(cookieParser(process.env.COOKIE_SECRET));
 
 	/** initialize swagger */
 	swaggerConfiguration(app);
