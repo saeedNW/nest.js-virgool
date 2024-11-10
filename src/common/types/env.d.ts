@@ -10,6 +10,7 @@ namespace NodeJS {
 	interface ProcessEnv {
 		/** Application configuration */
 		PORT: number; // Port number for the application
+		NODE_ENV: string; // Application runtime environment
 
 		/** Database configuration */
 		DB_PORT: number; // Database server port
