@@ -16,10 +16,15 @@ import { ProfileEntity } from "../user/entities/profile.entity";
 import {
 	AuthMessage,
 	BadRequestMessage,
+	successMessage,
 	ValidationMessage,
 } from "src/common/enums/messages.enum";
 import { OtpEntity } from "../user/entities/otp.entity";
 import { randomInt } from "crypto";
+import { TokenService } from "./tokens.service";
+import { Response } from "express";
+import { CookieKeys } from "src/common/enums/cookies.enum";
+import { TAuthResponse } from "./types/response";
 
 @Injectable()
 export class AuthService {
@@ -34,23 +39,35 @@ export class AuthService {
 
 		/** inject otp repository */
 		@InjectRepository(OtpEntity)
-		private otpRepository: Repository<OtpEntity>
+		private otpRepository: Repository<OtpEntity>,
+
+		/** Register token service */
+		private tokenService: TokenService
 	) {}
 
 	/**
 	 * Users' register/login process service
 	 * @param {AuthDto} authDto - Data sent by client
 	 */
-	userExistence(authDto: AuthDto) {
+	async userExistence(authDto: AuthDto, res: Response) {
 		/** destructure client data */
 		const { method, type, username } = authDto;
+
+		/** Declare a variable to save the result of login/register processes */
+		let result: TAuthResponse;
 
 		/** proceed based on user's request type [Login, Register] */
 		switch (type) {
 			case AuthType.LOGIN:
-				return this.login(method, username);
+				/** Handel login process */
+				result = await this.login(method, username);
+				/** send response to client */
+				return await this.sendResponse(res, result);
 			case AuthType.REGISTER:
-				return this.register(method, username);
+				/** Handel register process */
+				result = await this.register(method, username);
+				/** send response to client */
+				return this.sendResponse(res, result);
 			default:
 				throw new BadRequestException(BadRequestMessage.InvalidAuthType);
 		}
@@ -76,7 +93,13 @@ export class AuthService {
 		/** create OTP data */
 		const otp: OtpEntity = await this.saveOtp(user.id);
 
-		return { code: otp.code };
+		/** Generate user's otp token */
+		const token = this.tokenService.createOtpToken({ userId: user.id });
+
+		return {
+			token,
+			code: otp.code,
+		};
 	}
 
 	/**
@@ -113,9 +136,35 @@ export class AuthService {
 		/** create OTP data */
 		const otp: OtpEntity = await this.saveOtp(user.id);
 
-		return { code: otp.code };
-		// user.username = `m_${user.id}`;
+		/** Generate user's otp token */
+		const token = this.tokenService.createOtpToken({ userId: user.id });
+
+		return {
+			token,
+			code: otp.code,
+		};
 	}
+
+	/**
+	 * Send authorization process response to client
+	 * @param {Response} res - Express response object
+	 * @param {TAuthResponse} result - Login/register process result
+	 */
+	async sendResponse(res: Response, result: TAuthResponse) {
+		/** extract data from authentication process result */
+		const { token, code } = result;
+		/** Set a cookie in user browser ti be used in future auth processes */
+		res.cookie(CookieKeys.OTP, token, { httpOnly: true });
+
+		return res.json({
+			status: 201,
+			success: true,
+			message: successMessage.SendOTP,
+			data: { token, code },
+		});
+	}
+
+	async checkOtp() {}
 
 	/**
 	 * Validate Client's username filed based on the chosen method

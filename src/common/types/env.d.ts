@@ -20,6 +20,7 @@ namespace NodeJS {
 		DB_HOST: string; // Database host address
 
 		/** Secrets */
-		COOKIE_SECRET: string;
+		COOKIE_SECRET: string; // Cookie parser secret
+		OTP_TOKEN_SECRET: string; // JWT OTP token secret
 	}
 }

@@ -22,4 +22,5 @@ export enum ValidationMessage {
 
 export enum successMessage {
 	Default = "Process ended successfully",
+	SendOTP = "OTP has been sent successfully",
 }

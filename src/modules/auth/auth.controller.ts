@@ -1,9 +1,10 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Post, Res } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { ApiConsumes, ApiTags } from "@nestjs/swagger";
 import { AuthDto } from "./dto/auth.dto";
 import { plainToClass } from "class-transformer";
 import { SwaggerConsumes } from "src/common/enums/swagger-consumes.enum";
+import { Response } from "express";
 
 @Controller("auth")
 @ApiTags("Auth") //? Activate swagger for this module by defining a swagger API tag
@@ -16,12 +17,12 @@ export class AuthController {
 	 */
 	@Post("user-existence")
 	@ApiConsumes(SwaggerConsumes.URL_ENCODED, SwaggerConsumes.JSON) //? Define swagger input type
-	userExistence(@Body() authDto: AuthDto) {
+	userExistence(@Body() authDto: AuthDto, @Res() res: Response) {
 		/** filter client data and remove unwanted data */
 		const filteredData = plainToClass(AuthDto, authDto, {
 			excludeExtraneousValues: true,
 		});
 
-		return this.authService.userExistence(filteredData);
+		return this.authService.userExistence(filteredData, res);
 	}
 }
