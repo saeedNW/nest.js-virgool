@@ -2,12 +2,12 @@ import { ApiProperty } from "@nestjs/swagger";
 import { FailureApiBaseResponse } from "src/common/responses/base.response";
 
 /**
- * Send OTP process conflict response
+ * Internal server error response
  */
-export class SendOtpConflict extends FailureApiBaseResponse {
+export class InternalServerErrorResponse extends FailureApiBaseResponse {
 	@ApiProperty({
 		description: "Response status code",
-		example: 409,
+		example: 500,
 	})
 	statusCode: number;
 }

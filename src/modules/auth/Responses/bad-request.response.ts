@@ -1,31 +1,13 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { BadRequestMessage } from "src/common/enums/messages.enum";
+import { FailureApiBaseResponse } from "src/common/responses/base.response";
 
 /**
  * Send OTP process bad request response
  */
-export class SendOtpBadRequest {
+export class SendOtpBadRequest extends FailureApiBaseResponse {
 	@ApiProperty({
 		description: "Response status code",
 		example: 400,
 	})
 	statusCode: number;
-
-	@ApiProperty({
-		description: "Process result type",
-		example: false,
-	})
-	success: boolean;
-
-	@ApiProperty({
-		description: "Response message",
-		example: BadRequestMessage.InvalidRegisterMethod,
-	})
-	message: string;
-
-	@ApiProperty({
-		description: "Response timestamp",
-		example: new Date(),
-	})
-	timestamp: Date;
 }

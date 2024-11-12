@@ -1,10 +1,10 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { ValidationMessage } from "src/common/enums/messages.enum";
+import { FailureApiBaseResponse } from "src/common/responses/base.response";
 
 /**
  * Send OTP process unprocessable response
  */
-export class SendOtpUnprocessable {
+export class SendOtpUnprocessable extends FailureApiBaseResponse {
 	@ApiProperty({
 		description: "Response status code",
 		example: 422,
@@ -12,20 +12,8 @@ export class SendOtpUnprocessable {
 	statusCode: number;
 
 	@ApiProperty({
-		description: "Process result type",
-		example: false,
-	})
-	success: boolean;
-
-	@ApiProperty({
 		description: "Response message",
-		example: [ValidationMessage.InvalidEmail, ValidationMessage.UsernameLength],
+		example: ["Validation Error #1", "Validation Error #2"],
 	})
-	message: [string];
-
-	@ApiProperty({
-		description: "Response timestamp",
-		example: new Date(),
-	})
-	timestamp: Date;
+	override message: [string];
 }
