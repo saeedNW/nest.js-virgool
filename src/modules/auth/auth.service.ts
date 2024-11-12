@@ -16,7 +16,7 @@ import { ProfileEntity } from "../user/entities/profile.entity";
 import {
 	AuthMessage,
 	BadRequestMessage,
-	successMessage,
+	SuccessMessage,
 	ValidationMessage,
 } from "src/common/enums/messages.enum";
 import { OtpEntity } from "../user/entities/otp.entity";
@@ -159,9 +159,9 @@ export class AuthService {
 		return res.json({
 			status: 201,
 			success: true,
-			message: successMessage.SendOTP,
 			data: { token, code },
 		});
+			message: SuccessMessage.SendOTP,
 	}
 
 	async checkOtp() {}

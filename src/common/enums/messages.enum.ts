@@ -13,14 +13,14 @@ export enum AuthMessage {
 export enum NotFoundMessage {}
 
 export enum ValidationMessage {
-	UsernameLength = "Username length should be 3 to 30 characters",
+	UsernameLength = "Username length should be 3 to 60 characters",
 	InvalidAuthType = "Invalid auth type",
 	InvalidAuthMethod = "Invalid auth method",
 	InvalidEmail = "Invalid email address",
 	InvalidPhone = "Invalid phone number",
 }
 
-export enum successMessage {
+export enum SuccessMessage {
 	Default = "Process ended successfully",
 	SendOTP = "OTP has been sent successfully",
 }
