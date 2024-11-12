@@ -98,7 +98,7 @@ export class AuthService {
 		}
 
 		/** create OTP data */
-		const otp: OtpEntity = await this.saveOtp(user.id);
+		const otp: OtpEntity = await this.saveOtp(user.id, method);
 
 		/** Generate user's otp token */
 		const token = this.tokenService.createOtpToken({ userId: user.id });
@@ -141,7 +141,7 @@ export class AuthService {
 		user = await this.userRepository.save(user);
 
 		/** create OTP data */
-		const otp: OtpEntity = await this.saveOtp(user.id);
+		const otp: OtpEntity = await this.saveOtp(user.id, method);
 
 		/** Generate user's otp token */
 		const token = this.tokenService.createOtpToken({ userId: user.id });
@@ -207,8 +207,29 @@ export class AuthService {
 			throw new UnauthorizedException(AuthMessage.IncorrectCode);
 		}
 
+		/** create client's access token */
+		const accessToken = this.tokenService.createAccessToken({ userId });
+
+		/** update user's phone/email verification based on authorization and OTP method */
+		if (otp.method === AuthMethod.EMAIL) {
+			await this.userRepository.update(
+				{ id: userId },
+				{
+					verify_email: true,
+				}
+			);
+		} else if (otp.method === AuthMethod.PHONE) {
+			await this.userRepository.update(
+				{ id: userId },
+				{
+					verify_email: true,
+				}
+			);
+		}
+		
 		return {
 			message: SuccessMessage.Login,
+			accessToken,
 		};
 	}
 
@@ -256,7 +277,7 @@ export class AuthService {
 	 * @param {number} userId - User's data id
 	 * @returns {Promise<OtpEntity>} - returns OTP data
 	 */
-	async saveOtp(userId: number): Promise<OtpEntity> {
+	async saveOtp(userId: number, method: AuthMethod): Promise<OtpEntity> {
 		/** create a random 5 digit number */
 		const code: string = randomInt(10000, 99999).toString();
 		/** set the expires time of the OTP for 2 min */
@@ -282,9 +303,10 @@ export class AuthService {
 			/** update otp data */
 			otp.code = code;
 			otp.expires_in = expires_in;
+			otp.method = method;
 		} else {
 			/** create new otp */
-			otp = this.otpRepository.create({ code, expires_in, userId });
+			otp = this.otpRepository.create({ code, expires_in, userId, method });
 		}
 
 		/** save otp data */

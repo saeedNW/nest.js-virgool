@@ -22,5 +22,6 @@ namespace NodeJS {
 		/** Secrets */
 		COOKIE_SECRET: string; // Cookie parser secret
 		OTP_TOKEN_SECRET: string; // JWT OTP token secret
+		ACCESS_TOKEN_SECRET: string; // JWT access token secret
 	}
 }
