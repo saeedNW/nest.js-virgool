@@ -8,6 +8,9 @@ export enum BadRequestMessage {
 export enum AuthMessage {
 	InvalidData = "The entered data is invalid",
 	DuplicatedEntry = "Your account has already been registered",
+	ExpiredCode = "This OTP has been expired",
+	AuthorizationFailed = "Authorization filed. Please retry",
+	IncorrectCode = "This code is incorrect",
 }
 
 export enum NotFoundMessage {}
@@ -18,9 +21,11 @@ export enum ValidationMessage {
 	InvalidAuthMethod = "Invalid auth method",
 	InvalidEmail = "Invalid email address",
 	InvalidPhone = "Invalid phone number",
+	OTPLength = "The OTP code should be 5 characters",
 }
 
 export enum SuccessMessage {
 	Default = "Process ended successfully",
 	SendOTP = "OTP has been sent successfully",
+	Login = "You have logged in to your account successfully",
 }

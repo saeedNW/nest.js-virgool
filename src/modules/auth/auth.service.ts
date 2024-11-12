@@ -1,7 +1,9 @@
 import {
 	BadRequestException,
 	ConflictException,
+	Inject,
 	Injectable,
+	Scope,
 	UnauthorizedException,
 	UnprocessableEntityException,
 } from "@nestjs/common";
@@ -22,11 +24,12 @@ import {
 import { OtpEntity } from "../user/entities/otp.entity";
 import { randomInt } from "crypto";
 import { TokenService } from "./tokens.service";
-import { Response } from "express";
+import { Request, Response } from "express";
 import { CookieKeys } from "src/common/enums/cookies.enum";
 import { TAuthResponse } from "./types/response";
+import { REQUEST } from "@nestjs/core";
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class AuthService {
 	constructor(
 		/** inject user repository */
@@ -40,6 +43,10 @@ export class AuthService {
 		/** inject otp repository */
 		@InjectRepository(OtpEntity)
 		private otpRepository: Repository<OtpEntity>,
+
+		/** make the current request accessible in service  */
+		@Inject(REQUEST)
+		private request: Request,
 
 		/** Register token service */
 		private tokenService: TokenService
@@ -154,17 +161,56 @@ export class AuthService {
 		/** extract data from authentication process result */
 		const { token, code } = result;
 		/** Set a cookie in user browser ti be used in future auth processes */
-		res.cookie(CookieKeys.OTP, token, { httpOnly: true });
+		res.cookie(CookieKeys.OTP, token, {
+			httpOnly: true,
+			signed: true,
+			expires: new Date(Date.now() + 1000 * 60 * 2), // 2 Mins
+		});
 
-		return res.json({
+		const responseData = {
 			status: 201,
 			success: true,
-			data: { token, code },
-		});
 			message: SuccessMessage.SendOTP,
+		};
+
+		/** add token and to response data if project isn't in production */
+		if (process.env?.NODE_ENV !== "production") {
+			responseData["data"] = { code, token };
+		}
+
+		return res.json(responseData);
 	}
 
-	async checkOtp() {}
+	async checkOtp(code: string) {
+		/** Extract client's otp token from current request */
+		const token: string | undefined =
+			this.request.signedCookies?.[CookieKeys.OTP];
+
+		/** throw error if token was undefined */
+		if (!token) {
+			throw new UnauthorizedException(AuthMessage.ExpiredCode);
+		}
+
+		const { userId } = this.tokenService.verifyOtpToken(token);
+
+		const otp = await this.otpRepository.findOneBy({ userId });
+
+		if (!otp) throw new UnauthorizedException(AuthMessage.AuthorizationFailed);
+
+		const now = new Date();
+
+		if (otp.expires_in < now) {
+			throw new UnauthorizedException(AuthMessage.AuthorizationFailed);
+		}
+
+		if (otp.code !== code) {
+			throw new UnauthorizedException(AuthMessage.IncorrectCode);
+		}
+
+		return {
+			message: SuccessMessage.Login,
+		};
+	}
 
 	/**
 	 * Validate Client's username filed based on the chosen method
