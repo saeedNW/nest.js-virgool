@@ -23,7 +23,7 @@ export class ResponseTransformerInterceptor implements NestInterceptor {
 				const Response = ctx.getResponse();
 
 				/** Retrieves the HTTP status code from the response */
-				const statusCode: number = Response.statusCode;
+				let statusCode: number = Response.statusCode;
 
 				/** Return a simple response object containing message if the response data was a simple string */
 				if (typeof data === "string") {
@@ -45,7 +45,24 @@ export class ResponseTransformerInterceptor implements NestInterceptor {
 					delete data["message"];
 				}
 
-				/** return a response object which contains a message and a data object */
+				/** Check if the data is and object with a statusCode property */
+				if (typeof data === "object" && "statusCode" in data) {
+					/** extract the statusCode property value and store it to statusCode */
+					statusCode = (data as { statusCode: number }).statusCode;
+					/** remove the statusCode property from data object */
+					delete data["statusCode"];
+				}
+
+				/** return a simple text response if data was empty */
+				if (Object.keys(data).length <= 0) {
+					return {
+						statusCode,
+						success: true,
+						message,
+					};
+				}
+
+				/** Return a response containing a data object */
 				return {
 					statusCode,
 					success: true,
