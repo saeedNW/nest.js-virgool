@@ -2,9 +2,9 @@ import { ApiProperty } from "@nestjs/swagger";
 import { FailureApiBaseResponse } from "src/common/responses/base.response";
 
 /**
- * Send OTP process unauthorized response
+ * API process unauthorized swagger response
  */
-export class SendOtpUnauthorized extends FailureApiBaseResponse {
+export class UnauthorizedResponse extends FailureApiBaseResponse {
 	@ApiProperty({
 		description: "Response status code",
 		example: 401,

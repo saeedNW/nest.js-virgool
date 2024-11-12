@@ -2,7 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { FailureApiBaseResponse } from "src/common/responses/base.response";
 
 /**
- * Internal server error response
+ * Internal server error swagger response
  */
 export class InternalServerErrorResponse extends FailureApiBaseResponse {
 	@ApiProperty({

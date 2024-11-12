@@ -6,12 +6,12 @@ import {
 	ApiUnauthorizedResponse,
 	ApiUnprocessableEntityResponse,
 } from "@nestjs/swagger";
-import { SendOtpBadRequest } from "../Responses/bad-request.response";
-import { SendOtpSuccess } from "../Responses/success.response";
-import { SendOtpUnauthorized } from "../Responses/unauthorized.response";
-import { SendOtpConflict } from "../Responses/conflict.response";
-import { SendOtpUnprocessable } from "../Responses/unprocessable.response";
 import { InternalServerErrorResponse } from "src/common/responses/internal-server-error-response";
+import { BadRequestResponse } from "src/common/responses/bad-request.response";
+import { UnauthorizedResponse } from "src/common/responses/unauthorized.response";
+import { ConflictResponse } from "src/common/responses/conflict.response";
+import { UnprocessableEntityResponse } from "src/common/responses/unprocessable.response";
+import { SendOtpSuccess } from "../responses/success.response";
 
 /**
  * Custom decorator that combines multiple Swagger response decorators into a single, reusable decorator
@@ -51,43 +51,43 @@ export function ApiUserExistenceResponses() {
 
 		/**
 		 * Indicates a client error with status code 400 when the request data is invalid.
-		 * Returns a `SendOtpBadRequest` response object to document the error state in Swagger.
+		 * Returns a `BadRequestResponse` response object to document the error state in Swagger.
 		 */
 		ApiBadRequestResponse({
 			description: "Bad Request Response",
-			type: SendOtpBadRequest,
+			type: BadRequestResponse,
 		})(target, propertyKey, descriptor);
 
 		/**
 		 * Indicates an authentication error with status code 401.
-		 * Returns a `SendOtpUnauthorized` response object to document the unauthorized state in Swagger.
+		 * Returns a `UnauthorizedResponse` response object to document the unauthorized state in Swagger.
 		 */
 		ApiUnauthorizedResponse({
 			description: "Unauthorized Response",
-			type: SendOtpUnauthorized,
+			type: UnauthorizedResponse,
 		})(target, propertyKey, descriptor);
 
 		/**
 		 * Indicates a conflict error with status code 409, often due to duplicate data.
-		 * Returns a `SendOtpConflict` response object to document the conflict state in Swagger.
+		 * Returns a `ConflictResponse` response object to document the conflict state in Swagger.
 		 */
 		ApiConflictResponse({
 			description: "Conflict Response",
-			type: SendOtpConflict,
+			type: ConflictResponse,
 		})(target, propertyKey, descriptor);
 
 		/**
 		 * Indicates a validation error with status code 422 when the request data cannot be processed.
-		 * Returns a `SendOtpUnprocessable` response object to document the unprocessable entity state in Swagger.
+		 * Returns a `UnprocessableEntityResponse` response object to document the unprocessable entity state in Swagger.
 		 */
 		ApiUnprocessableEntityResponse({
 			description: "Unprocessable Entity Response",
-			type: SendOtpUnprocessable,
+			type: UnprocessableEntityResponse,
 		})(target, propertyKey, descriptor);
 
 		/**
-		 * Indicates a validation error with status code 422 when the request data cannot be processed.
-		 * Returns a `SendOtpUnprocessable` response object to document the unprocessable entity state in Swagger.
+		 * Indicates a server error with status code 500.
+		 * Returns an `InternalServerErrorResponse` object to document the server error state in Swagger.
 		 */
 		ApiInternalServerErrorResponse({
 			description: "Internal Server Error",

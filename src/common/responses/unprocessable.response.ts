@@ -2,9 +2,9 @@ import { ApiProperty } from "@nestjs/swagger";
 import { FailureApiBaseResponse } from "src/common/responses/base.response";
 
 /**
- * Send OTP process unprocessable response
+ * API process unprocessable entity swagger response
  */
-export class SendOtpUnprocessable extends FailureApiBaseResponse {
+export class UnprocessableEntityResponse extends FailureApiBaseResponse {
 	@ApiProperty({
 		description: "Response status code",
 		example: 422,
