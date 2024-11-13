@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { FailureApiBaseResponse } from "src/common/responses/base.response";
+import { FailureApiBaseResponse } from "src/common/abstracts/base.response";
 
 /**
  * API process bad request swagger response

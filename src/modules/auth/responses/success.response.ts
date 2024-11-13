@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { CreateApiBaseResponse } from "src/common/responses/base.response";
+import { CreateApiBaseResponse } from "src/common/abstracts/base.response";
 
 /**
  * Send OTP process success response
@@ -20,5 +20,5 @@ export class CheckOtpSuccess extends CreateApiBaseResponse {
 		description: "Response data (Development Environment Only)",
 		example: { token: "JWT Token" },
 	})
-	data: { token: string };
+	data: { accessToken: string };
 }
