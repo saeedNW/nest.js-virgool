@@ -226,7 +226,7 @@ export class AuthService {
 				}
 			);
 		}
-		
+
 		return {
 			message: SuccessMessage.Login,
 			accessToken,
@@ -320,5 +320,27 @@ export class AuthService {
 		// TODO: Send OTP code through SMS / Email
 
 		return otp;
+	}
+
+	/**
+	 * Clients' access token validation process
+	 * @param {string} token - Access token retrieved from client's request
+	 * @throws {UnauthorizedException} - In case of invalid token throw "Unauthorized Exception" error
+	 * @returns {Promise<UserEntity | never>} - Returns user's data or throw an error
+	 */
+	async validateAccessToken(token: string): Promise<UserEntity | never> {
+		/** extract user's id from access token */
+		const { userId } = this.tokenService.verifyAccessToken(token);
+
+		/** retrieve user's data from database */
+		const user = await this.userRepository.findOneBy({ id: userId });
+
+		/** throw error if user was not found */
+		if (!user) {
+			throw new UnauthorizedException(AuthMessage.AuthorizationFailed);
+		}
+
+		/** return user's data */
+		return user;
 	}
 }

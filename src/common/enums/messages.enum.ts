@@ -9,7 +9,7 @@ export enum AuthMessage {
 	InvalidData = "The entered data is invalid",
 	DuplicatedEntry = "Your account has already been registered",
 	ExpiredCode = "This OTP has been expired",
-	AuthorizationFailed = "Authorization filed. Please retry",
+	AuthorizationFailed = "Authorization filed. log in again.",
 	IncorrectCode = "This code is incorrect",
 }
 

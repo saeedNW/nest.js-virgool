@@ -26,14 +26,22 @@ export class TokenService {
 	/**
 	 * Verify JWT OTP Token
 	 * @param {string} token - Client's OTP Token
+	 * @throws {UnauthorizedException} Throws exceptions if the token is invalid or missing.
 	 * @returns {TJwtPayload} - Data object saved in JWT Payload
 	 */
-	verifyOtpToken(token: string): TJwtPayload {
-		/** Verify OTP JWT token */
+	verifyOtpToken(token: string): TJwtPayload | never {
 		try {
-			return this.jwtService.verify(token, {
+			/** Verify OTP JWT token */
+			const payload = this.jwtService.verify(token, {
 				secret: process.env.OTP_TOKEN_SECRET,
 			});
+
+			/** Throw error in case of invalid payload */
+			if (typeof payload !== "object" && !("id" in payload)) {
+				throw new UnauthorizedException(AuthMessage.AuthorizationFailed);
+			}
+
+			return payload;
 		} catch (error) {
 			throw new UnauthorizedException(AuthMessage.AuthorizationFailed);
 		}
@@ -58,9 +66,17 @@ export class TokenService {
 	 */
 	verifyAccessToken(token: string): TJwtPayload {
 		try {
-			return this.jwtService.verify(token, {
+			/** Verify access token */
+			const payload = this.jwtService.verify(token, {
 				secret: process.env.ACCESS_TOKEN_SECRET,
 			});
+
+			/** Throw error in case of invalid payload */
+			if (typeof payload !== "object" && !("id" in payload)) {
+				throw new UnauthorizedException(AuthMessage.AuthorizationFailed);
+			}
+
+			return payload;
 		} catch (error) {
 			throw new UnauthorizedException(AuthMessage.AuthorizationFailed);
 		}
