@@ -5,6 +5,7 @@ import { resolve } from "path";
 import { TypeOrmConfig } from "src/config/typeorm.config";
 import { UserModule } from "../user/user.module";
 import { AuthModule } from "../auth/auth.module";
+import { CategoryModule } from "../category/category.module";
 
 @Module({
 	imports: [
@@ -20,6 +21,7 @@ import { AuthModule } from "../auth/auth.module";
 		/** Load modules */
 		AuthModule,
 		UserModule,
+		CategoryModule,
 	],
 	controllers: [],
 	providers: [],
