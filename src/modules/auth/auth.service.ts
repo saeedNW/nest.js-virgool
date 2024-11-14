@@ -18,6 +18,7 @@ import { ProfileEntity } from "../user/entities/profile.entity";
 import {
 	AuthMessage,
 	BadRequestMessage,
+	ConflictMessage,
 	SuccessMessage,
 	ValidationMessage,
 } from "src/common/enums/messages.enum";
@@ -128,7 +129,7 @@ export class AuthService {
 
 		/** throw error if user was duplicated */
 		if (user) {
-			throw new ConflictException(AuthMessage.DuplicatedEntry);
+			throw new ConflictException(ConflictMessage.accountInfo);
 		}
 
 		/** create new user's data */

@@ -1,26 +1,73 @@
-import { Injectable } from '@nestjs/common';
-import { CreateCategoryDto } from './dto/create-category.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
+import { ConflictException, Injectable } from "@nestjs/common";
+import { CreateCategoryDto } from "./dto/create-category.dto";
+import { UpdateCategoryDto } from "./dto/update-category.dto";
+import { InjectRepository } from "@nestjs/typeorm";
+import { CategoryEntity } from "./entities/category.entity";
+import { Repository } from "typeorm";
+import {
+	ConflictMessage,
+	SuccessMessage,
+} from "src/common/enums/messages.enum";
 
 @Injectable()
 export class CategoryService {
-  create(createCategoryDto: CreateCategoryDto) {
-    return 'This action adds a new category';
-  }
+	constructor(
+		/** Register category repository */
+		@InjectRepository(CategoryEntity)
+		private categoryRepository: Repository<CategoryEntity>
+	) {}
 
-  findAll() {
-    return `This action returns all category`;
-  }
+	async create(createCategoryDto: CreateCategoryDto) {
+		/** Destruct the data object sent by user */
+		let { priority, title } = createCategoryDto;
+		/** Check if the title is duplicated or not */
+		title = await this.checkExistAndResolveTitle(title);
+		/** Convert priority data to be a number */
+		priority = +priority || undefined;
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
-  }
+		/** Create an instance of category entity by given data */
+		const category = this.categoryRepository.create({
+			title,
+			priority,
+		});
+		/** Save category data in database */
+		await this.categoryRepository.save(category);
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
-  }
+		return SuccessMessage.CreateCategory;
+	}
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
-  }
+	findAll() {
+		return this.categoryRepository.find();
+	}
+
+	findOne(id: number) {
+		return `This action returns a #${id} category`;
+	}
+
+	update(id: number, updateCategoryDto: UpdateCategoryDto) {
+		return `This action updates a #${id} category`;
+	}
+
+	remove(id: number) {
+		return `This action removes a #${id} category`;
+	}
+
+	/**
+	 * Check if the Chosen category title is duplicated
+	 * @param {string} title - Category title sent by user request
+	 * @throws {ConflictException} - In case of duplicated title throw "Conflict Exception" error
+	 * @returns {string|never} - Return the title in case ii's not duplicated
+	 */
+	async checkExistAndResolveTitle(title: string): Promise<string> {
+		/** trim and lower case the title */
+		title = title?.trim()?.toLowerCase();
+		/** Retrieve category data from database by its title */
+		const category: CategoryEntity = await this.categoryRepository.findOneBy({
+			title,
+		});
+		/** Throw error if the title is duplicated */
+		if (category) throw new ConflictException(ConflictMessage.CategoryTitle);
+		/** return the validated title */
+		return title;
+	}
 }
