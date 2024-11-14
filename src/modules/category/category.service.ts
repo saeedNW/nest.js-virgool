@@ -81,8 +81,18 @@ export class CategoryService {
 		return `This action updates a #${id} category`;
 	}
 
-	remove(id: number) {
-		return `This action removes a #${id} category`;
+	/**
+	 * Remove category by id number
+	 * @param {number} id category's id number
+	 * @returns {Promise<string>} success message
+	 */
+	async remove(id: number): Promise<string> {
+		/** check if category exist */
+		await this.findOne(id);
+		/** remove category */
+		await this.categoryRepository.delete({ id });
+		/** return success response */
+		return SuccessMessage.RemoveCategory;
 	}
 
 	/**

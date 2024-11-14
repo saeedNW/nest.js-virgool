@@ -27,6 +27,7 @@ import { PaginationDto } from "src/common/dto/pagination.dto";
 import { ApiFindAllCategoriesResponses } from "./decorators/find-all-response.decorator";
 import { FindOneCategoriesSuccess } from "./responses/success.response";
 import { ApiFindOneCategoriesResponses } from "./decorators/find-one-response.decorator";
+import { ApiDeleteCategoriesResponses } from "./decorators/delete-category-response.decorator";
 
 @Controller("category")
 @ApiTags("Category")
@@ -73,7 +74,8 @@ export class CategoryController {
 	}
 
 	@Delete(":id")
-	remove(@Param("id") id: string) {
+	@ApiDeleteCategoriesResponses()
+	remove(@Param("id", ParseIntPipe) id: number) {
 		return this.categoryService.remove(+id);
 	}
 }

@@ -66,6 +66,9 @@ export class FindAllCategoriesSuccess extends OkApiBaseResponse {
 	};
 }
 
+/**
+ * Find one category process success response
+ */
 export class FindOneCategoriesSuccess extends OkApiBaseResponse {
 	@ApiProperty({
 		description: "Response data",
@@ -79,3 +82,8 @@ export class FindOneCategoriesSuccess extends OkApiBaseResponse {
 	})
 	data: CategoryEntity;
 }
+
+/**
+ * Delete category process success response
+ */
+export class DeleteCategorySuccess extends OkApiBaseResponse {}

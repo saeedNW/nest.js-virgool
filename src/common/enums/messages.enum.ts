@@ -36,4 +36,5 @@ export enum SuccessMessage {
 	SendOTP = "OTP has been sent successfully",
 	Login = "You have logged in to your account successfully",
 	CreateCategory = "Category created successfully",
+	RemoveCategory = "Category removed successfully",
 }
