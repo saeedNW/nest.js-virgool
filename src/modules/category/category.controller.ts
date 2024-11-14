@@ -7,6 +7,7 @@ import {
 	Param,
 	Delete,
 	UseGuards,
+	Query,
 } from "@nestjs/common";
 import { CategoryService } from "./category.service";
 import { CreateCategoryDto } from "./dto/create-category.dto";
@@ -16,6 +17,8 @@ import { AuthGuard } from "../auth/guard/auth.guard";
 import { SwaggerConsumes } from "src/common/enums/swagger-consumes.enum";
 import { plainToClass } from "class-transformer";
 import { ApiCreateCategoryResponses } from "./decorators/create-category-responses.decorator";
+import { PaginationDto } from "src/common/dto/pagination.dto";
+import { ApiFindAllCategoriesResponses } from "./decorators/find-all-response.decorator";
 
 @Controller("category")
 @ApiTags("Category")
@@ -37,8 +40,14 @@ export class CategoryController {
 	}
 
 	@Get()
-	findAll() {
-		return this.categoryService.findAll();
+	@ApiFindAllCategoriesResponses()
+	findAll(@Query() paginationDto: PaginationDto) {
+		/** filter client data and remove unwanted data */
+		const filteredData = plainToClass(PaginationDto, paginationDto, {
+			excludeExtraneousValues: true,
+		});
+
+		return this.categoryService.findAll(filteredData);
 	}
 
 	@Get(":id")

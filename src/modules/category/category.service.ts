@@ -8,6 +8,8 @@ import {
 	ConflictMessage,
 	SuccessMessage,
 } from "src/common/enums/messages.enum";
+import { PaginationDto } from "src/common/dto/pagination.dto";
+import { paginate, Pagination } from "nestjs-typeorm-paginate";
 
 @Injectable()
 export class CategoryService {
@@ -17,7 +19,12 @@ export class CategoryService {
 		private categoryRepository: Repository<CategoryEntity>
 	) {}
 
-	async create(createCategoryDto: CreateCategoryDto) {
+	/**
+	 * category creation process service
+	 * @param {CreateCategoryDto} createCategoryDto - category data sent by user
+	 * @returns {Promise<string>|never} - Return process result message
+	 */
+	async create(createCategoryDto: CreateCategoryDto): Promise<string> | never {
 		/** Destruct the data object sent by user */
 		let { priority, title } = createCategoryDto;
 		/** Check if the title is duplicated or not */
@@ -36,8 +43,19 @@ export class CategoryService {
 		return SuccessMessage.CreateCategory;
 	}
 
-	findAll() {
-		return this.categoryRepository.find();
+	/**
+	 * Retrieve categories data in pagination
+	 * @param {PaginationDto} paginationDto - Pagination data such as page and limit
+	 * @returns {Promise<Pagination<CategoryEntity>>} Founded data plus pagination meta data
+	 */
+	async findAll(
+		paginationDto: PaginationDto
+	): Promise<Pagination<CategoryEntity>> {
+		/** Retrieve categories using `paginate method from `nestjs-typeorm-paginate` module */
+		return paginate<CategoryEntity>(this.categoryRepository, {
+			...paginationDto,
+			route: process.env.SERVER_LINK,
+		});
 	}
 
 	findOne(id: number) {
@@ -58,7 +76,7 @@ export class CategoryService {
 	 * @throws {ConflictException} - In case of duplicated title throw "Conflict Exception" error
 	 * @returns {string|never} - Return the title in case ii's not duplicated
 	 */
-	async checkExistAndResolveTitle(title: string): Promise<string> {
+	async checkExistAndResolveTitle(title: string): Promise<string> | never {
 		/** trim and lower case the title */
 		title = title?.trim()?.toLowerCase();
 		/** Retrieve category data from database by its title */

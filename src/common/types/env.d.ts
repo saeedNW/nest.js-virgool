@@ -9,6 +9,7 @@
 namespace NodeJS {
 	interface ProcessEnv {
 		/** Application configuration */
+		SERVER_LINK: string; // Application's Server URL address
 		PORT: number; // Port number for the application
 		NODE_ENV: string; // Application runtime environment
 
