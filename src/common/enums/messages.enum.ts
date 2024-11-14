@@ -12,7 +12,9 @@ export enum AuthMessage {
 	IncorrectCode = "This code is incorrect",
 }
 
-export enum NotFoundMessage {}
+export enum NotFoundMessage {
+	Category = "This category was not found",
+}
 
 export enum ConflictMessage {
 	CategoryTitle = "This title is duplicated",

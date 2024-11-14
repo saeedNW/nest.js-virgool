@@ -3,6 +3,7 @@ import {
 	CreateApiBaseResponse,
 	OkApiBaseResponse,
 } from "src/common/abstracts/base.response";
+import { CategoryEntity } from "../entities/category.entity";
 
 /**
  * Create category process success response
@@ -48,7 +49,7 @@ export class FindAllCategoriesSuccess extends OkApiBaseResponse {
 		},
 	})
 	data: {
-		items: Array<object>;
+		items: [CategoryEntity];
 		meta: {
 			totalItems: number;
 			itemCount: number;
@@ -63,4 +64,18 @@ export class FindAllCategoriesSuccess extends OkApiBaseResponse {
 			last: string;
 		};
 	};
+}
+
+export class FindOneCategoriesSuccess extends OkApiBaseResponse {
+	@ApiProperty({
+		description: "Response data",
+		example: {
+			id: 1,
+			created_at: "2024-11-13T14:28:37.380Z",
+			updated_at: "2024-11-13T14:28:37.380Z",
+			title: "programming",
+			priority: 12,
+		},
+	})
+	data: CategoryEntity;
 }

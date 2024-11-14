@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from "@nestjs/common";
+import {
+	ConflictException,
+	Injectable,
+	NotFoundException,
+} from "@nestjs/common";
 import { CreateCategoryDto } from "./dto/create-category.dto";
 import { UpdateCategoryDto } from "./dto/update-category.dto";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -6,6 +10,7 @@ import { CategoryEntity } from "./entities/category.entity";
 import { Repository } from "typeorm";
 import {
 	ConflictMessage,
+	NotFoundMessage,
 	SuccessMessage,
 } from "src/common/enums/messages.enum";
 import { PaginationDto } from "src/common/dto/pagination.dto";
@@ -58,8 +63,18 @@ export class CategoryService {
 		});
 	}
 
-	findOne(id: number) {
-		return `This action returns a #${id} category`;
+	/**
+	 * Retrieve single category by id number
+	 * @param {number} id category's id number
+	 * @returns {Promise<CategoryEntity>} Single category data object
+	 */
+	async findOne(id: number): Promise<CategoryEntity> {
+		/** Retrieve category's data from database */
+		const category = await this.categoryRepository.findOneBy({ id });
+		/** throw error if category was not found */
+		if (!category) throw new NotFoundException(NotFoundMessage.Category);
+		/** return category's data object */
+		return category;
 	}
 
 	update(id: number, updateCategoryDto: UpdateCategoryDto) {

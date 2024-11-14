@@ -8,17 +8,25 @@ import {
 	Delete,
 	UseGuards,
 	Query,
+	ParseIntPipe,
 } from "@nestjs/common";
 import { CategoryService } from "./category.service";
 import { CreateCategoryDto } from "./dto/create-category.dto";
 import { UpdateCategoryDto } from "./dto/update-category.dto";
-import { ApiBearerAuth, ApiConsumes, ApiTags } from "@nestjs/swagger";
+import {
+	ApiBearerAuth,
+	ApiConsumes,
+	ApiOkResponse,
+	ApiTags,
+} from "@nestjs/swagger";
 import { AuthGuard } from "../auth/guard/auth.guard";
 import { SwaggerConsumes } from "src/common/enums/swagger-consumes.enum";
 import { plainToClass } from "class-transformer";
 import { ApiCreateCategoryResponses } from "./decorators/create-category-responses.decorator";
 import { PaginationDto } from "src/common/dto/pagination.dto";
 import { ApiFindAllCategoriesResponses } from "./decorators/find-all-response.decorator";
+import { FindOneCategoriesSuccess } from "./responses/success.response";
+import { ApiFindOneCategoriesResponses } from "./decorators/find-one-response.decorator";
 
 @Controller("category")
 @ApiTags("Category")
@@ -51,8 +59,9 @@ export class CategoryController {
 	}
 
 	@Get(":id")
-	findOne(@Param("id") id: string) {
-		return this.categoryService.findOne(+id);
+	@ApiFindOneCategoriesResponses()
+	findOne(@Param("id", ParseIntPipe) id: number) {
+		return this.categoryService.findOne(id);
 	}
 
 	@Patch(":id")
