@@ -1,17 +1,10 @@
 import {
-	ApiBadRequestResponse,
-	ApiConflictResponse,
-	ApiCreatedResponse,
 	ApiInternalServerErrorResponse,
 	ApiOkResponse,
 	ApiUnauthorizedResponse,
-	ApiUnprocessableEntityResponse,
 } from "@nestjs/swagger";
-import { BadRequestResponse } from "src/common/responses/bad-request.response";
-import { ConflictResponse } from "src/common/responses/conflict.response";
 import { InternalServerErrorResponse } from "src/common/responses/internal-server-error-response";
 import { UnauthorizedResponse } from "src/common/responses/unauthorized.response";
-import { UnprocessableEntityResponse } from "src/common/responses/unprocessable.response";
 import { FindAllCategoriesSuccess } from "../responses/success.response";
 
 /**
