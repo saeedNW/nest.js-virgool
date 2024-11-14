@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { Expose } from "class-transformer";
+import { Expose, Type } from "class-transformer";
 import { IsNumber, IsString, Length, Min } from "class-validator";
 import { ValidationMessage } from "src/common/enums/messages.enum";
 
@@ -11,6 +11,8 @@ export class CreateCategoryDto {
 	title: string;
 
 	@ApiPropertyOptional()
+	@Type(() => Number)
+	@Min(1)
 	@Expose()
 	priority: number;
 }

@@ -28,6 +28,8 @@ import { ApiFindAllCategoriesResponses } from "./decorators/find-all-response.de
 import { FindOneCategoriesSuccess } from "./responses/success.response";
 import { ApiFindOneCategoriesResponses } from "./decorators/find-one-response.decorator";
 import { ApiDeleteCategoriesResponses } from "./decorators/delete-category-response.decorator";
+import { deleteInvalidPropertyInObject } from "src/common/utils/functions.utils";
+import { ApiUpdateCategoriesResponses } from "./decorators/update-category-response.decorator";
 
 @Controller("category")
 @ApiTags("Category")
@@ -66,11 +68,21 @@ export class CategoryController {
 	}
 
 	@Patch(":id")
+	@ApiConsumes(SwaggerConsumes.URL_ENCODED, SwaggerConsumes.JSON)
+	@ApiUpdateCategoriesResponses()
 	update(
-		@Param("id") id: string,
+		@Param("id", ParseIntPipe) id: number,
 		@Body() updateCategoryDto: UpdateCategoryDto
 	) {
-		return this.categoryService.update(+id, updateCategoryDto);
+		/** filter client data and remove unwanted data */
+		const filteredData = plainToClass(UpdateCategoryDto, updateCategoryDto, {
+			excludeExtraneousValues: true,
+		});
+
+		/** Remove invalid data */
+		deleteInvalidPropertyInObject(filteredData);
+
+		return this.categoryService.update(id, filteredData);
 	}
 
 	@Delete(":id")

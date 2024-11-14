@@ -84,6 +84,10 @@ export class FindOneCategoriesSuccess extends OkApiBaseResponse {
 }
 
 /**
+ * update category process success response
+ */
+export class UpdateCategorySuccess extends OkApiBaseResponse {}
+/**
  * Delete category process success response
  */
 export class DeleteCategorySuccess extends OkApiBaseResponse {}

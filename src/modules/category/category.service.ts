@@ -77,8 +77,13 @@ export class CategoryService {
 		return category;
 	}
 
-	update(id: number, updateCategoryDto: UpdateCategoryDto) {
-		return `This action updates a #${id} category`;
+	async update(id: number, updateCategoryDto: UpdateCategoryDto) {
+		/** check if category exist */
+		await this.findOne(id);
+		/** Update category data */
+		await this.categoryRepository.update({ id }, { ...updateCategoryDto });
+		/** send success message */
+		return SuccessMessage.UpdateCategory;
 	}
 
 	/**

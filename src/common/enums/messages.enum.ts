@@ -37,4 +37,5 @@ export enum SuccessMessage {
 	Login = "You have logged in to your account successfully",
 	CreateCategory = "Category created successfully",
 	RemoveCategory = "Category removed successfully",
+	UpdateCategory = "Category updated successfully",
 }
