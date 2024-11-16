@@ -1,44 +1,45 @@
-import {
-	Controller,
-	Get,
-	Post,
-	Body,
-	Patch,
-	Param,
-	Delete,
-} from "@nestjs/common";
+import { Controller, Body, Put, UseInterceptors } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { UpdateUserDto } from "./dto/update-user.dto";
-import { ApiTags } from "@nestjs/swagger";
+import { ApiConsumes, ApiTags } from "@nestjs/swagger";
+import { ProfileDto } from "./dto/profile.dto";
+import { SwaggerConsumes } from "src/common/enums/swagger-consumes.enum";
+import { plainToClass } from "class-transformer";
+import { deleteInvalidPropertyInObject } from "src/common/utils/functions.utils";
+import { FileFieldsInterceptor } from "@nestjs/platform-express";
+import { multerImageUploader } from "src/common/utils/multer.utils";
+import { AuthDecorator } from "src/common/decorator/auth.decorator";
+import { UploadedOptionalFiles } from "src/common/decorator/upload-file.decorator";
+import { TProfileImages } from "./types/files.type";
 
 @Controller("user")
 @ApiTags("User")
+@AuthDecorator()
 export class UserController {
 	constructor(private readonly userService: UserService) {}
 
-	@Post()
-	create(@Body() createUserDto: CreateUserDto) {
-		return this.userService.create(createUserDto);
-	}
+	@Put("/profile")
+	@ApiConsumes(SwaggerConsumes.MULTIPART_FORM_DATA)
+	@UseInterceptors(
+		FileFieldsInterceptor(
+			[
+				{ name: "profile_image", maxCount: 1 },
+				{ name: "profile_bg_image", maxCount: 1 },
+			],
+			multerImageUploader()
+		)
+	)
+	async changeProfile(
+		@UploadedOptionalFiles() files: TProfileImages,
+		@Body() profileDto: ProfileDto
+	) {
+		/** filter client data and remove unwanted data */
+		const filteredData = plainToClass(ProfileDto, profileDto, {
+			excludeExtraneousValues: true,
+		});
 
-	@Get()
-	findAll() {
-		return this.userService.findAll();
-	}
+		/** Remove invalid data */
+		deleteInvalidPropertyInObject(filteredData);
 
-	@Get(":id")
-	findOne(@Param("id") id: string) {
-		return this.userService.findOne(+id);
-	}
-
-	@Patch(":id")
-	update(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
-		return this.userService.update(+id, updateUserDto);
-	}
-
-	@Delete(":id")
-	remove(@Param("id") id: string) {
-		return this.userService.remove(+id);
+		return this.userService.changeProfile(files, filteredData);
 	}
 }

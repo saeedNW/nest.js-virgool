@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, OneToOne } from "typeorm";
 import { EntityName } from "src/common/enums/entity.enum";
 import { TimestampedEntity } from "src/common/abstracts/base.entity";
 import { OtpEntity } from "./otp.entity";
+import { ProfileEntity } from "./profile.entity";
 
 @Entity(EntityName.USER)
 export class UserEntity extends TimestampedEntity {
@@ -22,4 +23,9 @@ export class UserEntity extends TimestampedEntity {
 	@OneToOne(() => OtpEntity, (otp) => otp.user, { nullable: true })
 	@JoinColumn()
 	otp: OtpEntity;
+	@Column({ nullable: true })
+	profileId: number;
+	@OneToOne(() => ProfileEntity, (profile) => profile.user, { nullable: true })
+	@JoinColumn()
+	profile: ProfileEntity;
 }
