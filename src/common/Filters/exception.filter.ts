@@ -3,8 +3,11 @@ import {
 	Catch,
 	ArgumentsHost,
 	HttpException,
+	HttpStatus,
 } from "@nestjs/common";
-import { Response } from "express";
+import { Request, Response } from "express";
+import { ValidationMessage } from "../enums/messages.enum";
+import { removeUploadedFiles } from "../utils/multer.utils";
 
 /**
  * Implement custom response logic for exceptions.
@@ -16,9 +19,10 @@ import { Response } from "express";
 export class HttpExceptionFilter implements ExceptionFilter {
 	/** Catch the incoming exception */
 	catch(exception: HttpException, host: ArgumentsHost) {
-		/** Extracting the HTTP response object from host object */
+		/** Extracting the HTTP request and response object from host object */
 		const ctx = host.switchToHttp();
 		const response: Response = ctx.getResponse<Response>();
+		const request: Request = ctx.getRequest<Request>();
 
 		/** Retrieves the HTTP status code from the response */
 		const statusCode: number = exception.getStatus();
@@ -39,6 +43,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
 		) {
 			/** Handle case where the response is an object */
 			message = (exceptionResponse as { message: string }).message;
+		}
+
+		/** Set a custom message is the error is due to the upload proses large payload error */
+		if (statusCode === HttpStatus.PAYLOAD_TOO_LARGE) {
+			message = ValidationMessage.TooLargePayload;
+		}
+
+		/** Retrieve files from the request */
+		let files = request.files || request.file;
+
+		/** Handle single or multiple files removal process */
+		if (files) {
+			const isMultiFile = !Object.keys(files).includes("fieldname");
+			// @ts-ignore
+			removeUploadedFiles(files, isMultiFile);
 		}
 
 		/** return a custom response object to client */

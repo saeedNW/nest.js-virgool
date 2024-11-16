@@ -29,6 +29,9 @@ export enum ValidationMessage {
 	InvalidPhone = "Invalid phone number",
 	OTPLength = "The OTP code should be 5 characters",
 	CategoryTitleLength = "title length should be 3 to 20 characters",
+	InvalidFileData = "The uploaded file is unacceptable ",
+	InvalidFileFormat = "The uploaded file format is unacceptable ",
+	TooLargePayload = "The payload is to large",
 }
 
 export enum SuccessMessage {
