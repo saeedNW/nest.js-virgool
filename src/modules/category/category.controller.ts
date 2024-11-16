@@ -6,35 +6,27 @@ import {
 	Patch,
 	Param,
 	Delete,
-	UseGuards,
 	Query,
 	ParseIntPipe,
 } from "@nestjs/common";
 import { CategoryService } from "./category.service";
 import { CreateCategoryDto } from "./dto/create-category.dto";
 import { UpdateCategoryDto } from "./dto/update-category.dto";
-import {
-	ApiBearerAuth,
-	ApiConsumes,
-	ApiOkResponse,
-	ApiTags,
-} from "@nestjs/swagger";
-import { AuthGuard } from "../auth/guard/auth.guard";
+import { ApiConsumes, ApiTags } from "@nestjs/swagger";
 import { SwaggerConsumes } from "src/common/enums/swagger-consumes.enum";
 import { plainToClass } from "class-transformer";
 import { ApiCreateCategoryResponses } from "./decorators/create-category-responses.decorator";
 import { PaginationDto } from "src/common/dto/pagination.dto";
 import { ApiFindAllCategoriesResponses } from "./decorators/find-all-response.decorator";
-import { FindOneCategoriesSuccess } from "./responses/success.response";
 import { ApiFindOneCategoriesResponses } from "./decorators/find-one-response.decorator";
 import { ApiDeleteCategoriesResponses } from "./decorators/delete-category-response.decorator";
 import { deleteInvalidPropertyInObject } from "src/common/utils/functions.utils";
 import { ApiUpdateCategoriesResponses } from "./decorators/update-category-response.decorator";
+import { AuthDecorator } from "src/common/decorator/auth.decorator";
 
 @Controller("category")
 @ApiTags("Category")
-@UseGuards(AuthGuard)
-@ApiBearerAuth("Authorization")
+@AuthDecorator()
 export class CategoryController {
 	constructor(private readonly categoryService: CategoryService) {}
 
