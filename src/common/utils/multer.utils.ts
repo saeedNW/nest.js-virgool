@@ -144,21 +144,18 @@ export function removeUploadedFiles(
  * @param {TMulterFile} file - The file metadata provided by multer.
  * @param {number | undefined} userId - The ID of the user associated with the upload (optional).
  * @param {string} finalPath - The target directory (relative to the base upload directory).
- * @returns {Promise<string | boolean>} - The relative path to the finalized file or `false` if no file is provided.
+ * @returns {Promise<string>} - The relative path to the finalized file .
  */
 export async function uploadFinalization(
 	file: TMulterFile,
 	userId: number | undefined,
 	finalPath: string
-): Promise<string | boolean> {
-	/** If no file is provided, return false */
-	if (!file) return false;
-
+): Promise<string> {
 	let filePath: string;
 
 	/** Determine the final file path based on the presence of a user ID */
 	if (userId) {
-		filePath = `./uploads/${userId}/${finalPath}`;
+		filePath = `./public/uploads/users/${userId}/${finalPath}`;
 	} else {
 		filePath = `./public/uploads/${finalPath}`;
 	}
