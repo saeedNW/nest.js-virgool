@@ -54,7 +54,7 @@ export class ResponseTransformerInterceptor implements NestInterceptor {
 				}
 
 				/** return a simple text response if data was empty */
-				if (Object.keys(data).length <= 0) {
+				if (!data || Object.keys(data).length <= 0) {
 					return {
 						statusCode,
 						success: true,
