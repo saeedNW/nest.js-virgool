@@ -25,5 +25,6 @@ namespace NodeJS {
 		OTP_TOKEN_SECRET: string; // JWT OTP token secret
 		ACCESS_TOKEN_SECRET: string; // JWT access token secret
 		EMAIL_TOKEN_SECRET: string; // JWT email token secret
+		PHONE_TOKEN_SECRET: string; // JWT email token secret
 	}
 }

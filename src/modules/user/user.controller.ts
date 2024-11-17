@@ -24,6 +24,7 @@ import { ApiGetProfileResponses } from "./decorators/get-profile-responses.decor
 import { ChangeEmailDto } from "./dto/change-email.dto";
 import { Response } from "express";
 import { CheckOtpDto } from "../auth/dto/check-otp.dto";
+import { ChangePhoneDto } from "./dto/change-phone.dto";
 
 @Controller("user")
 @ApiTags("User")
@@ -91,9 +92,27 @@ export class UserController {
 		return this.userService.changeEmail(emailDto.email, response);
 	}
 
+	/**
+	 * User's email OTP verification controller
+	 * @param otpDto - data sent by client
+	 */
 	@Post("/verify-email")
 	@ApiConsumes(SwaggerConsumes.URL_ENCODED, SwaggerConsumes.JSON)
 	async verifyEmail(@Body() otpDto: CheckOtpDto) {
 		return this.userService.verifyEmail(otpDto.code);
+	}
+
+	/**
+	 * update user's phone process controller
+	 * @param {ChangePhoneDto} phoneDto - the data sent by client
+	 * @param {Response} response - Client's current response
+	 */
+	@Patch("/change-phone")
+	@ApiConsumes(SwaggerConsumes.URL_ENCODED, SwaggerConsumes.JSON)
+	changePhone(
+		@Body() phoneDto: ChangePhoneDto,
+		@Res({ passthrough: true }) response: Response
+	) {
+		return this.userService.changePhone(phoneDto.phone, response);
 	}
 }

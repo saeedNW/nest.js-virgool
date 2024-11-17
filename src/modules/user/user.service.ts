@@ -124,14 +124,14 @@ export class UserService {
 
 	/**
 	 * Service of the process of updating user's email address
-	 * @param email - user's new email address
-	 * @param response - Client's current response
+	 * @param {string} email - user's new email address
+	 * @param {Response} response - Client's current response
 	 */
 	async changeEmail(email: string, response: Response) {
 		/** extract user's id from request */
 		const { id } = this.request.user;
 
-		/** Retrieve users data by id */
+		/** Retrieve users data by email */
 		const user: UserEntity = await this.userRepository.findOneBy({ email });
 
 		/**
@@ -155,6 +155,52 @@ export class UserService {
 
 		/** Set the token cookie in client's browser */
 		response.cookie(CookieKeys.EMAIL, token, tokenCookieOptions());
+
+		const responseData = {
+			message: SuccessMessage.SendOTP,
+		};
+
+		/** add token and code to response data if project isn't in production */
+		if (process.env?.NODE_ENV !== "production") {
+			responseData["data"] = { code: otp.code, token };
+		}
+
+		return responseData;
+	}
+
+	/**
+	 * Service of the process of updating user's phone number
+	 * @param {string} phone - user's new phone number
+	 * @param {Response} response - Client's current response
+	 */
+	async changePhone(phone: string, response: Response) {
+		/** extract user's id from request */
+		const { id } = this.request.user;
+
+		/** Retrieve users data by phone */
+		const user: UserEntity = await this.userRepository.findOneBy({ phone });
+
+		/**
+		 * Throw error if the phone is duplicated and don't belong to the user or
+		 * a simple success message if belong to the user
+		 */
+		if (user && id !== user.id) {
+			throw new ConflictException(ConflictMessage.PhoneNumber);
+		} else if (user && id === user.id) {
+			return SuccessMessage.Default;
+		}
+
+		/** update user data and save the new phone number in the temporary field */
+		await this.userRepository.update({ id }, { new_phone: phone });
+
+		/** Create and save a new OTP code */
+		const otp: OtpEntity = await this.authService.saveOtp(id, AuthMethod.PHONE);
+
+		/** Create a new JWT token for further verification */
+		const token: string = this.tokenService.createPhoneToken({ phone });
+
+		/** Set the token cookie in client's browser */
+		response.cookie(CookieKeys.PHONE, token, tokenCookieOptions());
 
 		const responseData = {
 			message: SuccessMessage.SendOTP,
@@ -231,7 +277,7 @@ export class UserService {
 		/** Throw error if the code is invalid */
 		if (otp.code !== code)
 			throw new BadRequestException(AuthMessage.IncorrectCode);
-		
+
 		return otp;
 	}
 }

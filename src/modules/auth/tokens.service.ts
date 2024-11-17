@@ -4,7 +4,7 @@ import {
 	UnauthorizedException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { TJwtEmailPayload, TJwtOtpPayload } from "./types/payload";
+import { TJwtEmailPayload, TJwtOtpPayload, TJwtPhonePayload } from "./types/payload";
 import { AuthMessage, BadRequestMessage } from "src/common/enums/messages.enum";
 
 @Injectable()
@@ -121,5 +121,18 @@ export class TokenService {
 		} catch (error) {
 			throw new BadRequestException(BadRequestMessage.InvalidToken);
 		}
+	}
+
+	/**
+	 * Create and return JWT phone token
+	 * @param {TJwtPhonePayload} payload - Data that will be used in token
+	 * @returns {string} - JWT token
+	 */
+	createPhoneToken(payload: TJwtPhonePayload): string {
+		/** create phone token */
+		return this.jwtService.sign(payload, {
+			secret: process.env.PHONE_TOKEN_SECRET,
+			expiresIn: 60 * 2, // 2 Mins
+		});
 	}
 }

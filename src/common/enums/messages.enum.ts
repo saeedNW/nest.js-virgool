@@ -23,6 +23,7 @@ export enum ConflictMessage {
 	CategoryTitle = "This title is duplicated",
 	accountInfo = "Your account has already been registered",
 	EmailAddress = "Duplicated email address",
+	PhoneNumber = "Duplicated phone number",
 }
 
 export enum ValidationMessage {
