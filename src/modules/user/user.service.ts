@@ -79,4 +79,13 @@ export class UserService {
 
 		return SuccessMessage.Default;
 	}
+
+	async getProfile() {
+		const { id } = this.request.user;
+
+		return this.userRepository.findOne({
+			where: { id },
+			relations: ["profile"],
+		});
+	}
 }

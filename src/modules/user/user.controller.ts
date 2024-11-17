@@ -1,4 +1,4 @@
-import { Controller, Body, Put, UseInterceptors } from "@nestjs/common";
+import { Controller, Body, Put, UseInterceptors, Get } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { ApiConsumes, ApiTags } from "@nestjs/swagger";
 import { ProfileDto } from "./dto/profile.dto";
@@ -28,7 +28,7 @@ export class UserController {
 			multerImageUploader()
 		)
 	)
-	async changeProfile(
+	changeProfile(
 		@UploadedOptionalFiles() files: TProfileImages,
 		@Body() profileDto: ProfileDto
 	) {
@@ -41,5 +41,10 @@ export class UserController {
 		deleteInvalidPropertyInObject(filteredData);
 
 		return this.userService.changeProfile(files, filteredData);
+	}
+
+	@Get("/profile")
+	grtProfile() {
+		return this.userService.getProfile();
 	}
 }
