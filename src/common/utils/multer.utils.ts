@@ -178,9 +178,7 @@ export async function uploadFinalization(
 	/** Move the file to the final directory with the new name */
 	await rename(file.path, `${filePath}/${fileName}`);
 
-	return userId
-		? `${filePath}/${fileName}`.slice(1)
-		: `${filePath}/${fileName}`.slice(8);
+	return `${filePath}/${fileName}`.slice(8);
 }
 
 /**
