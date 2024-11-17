@@ -1,7 +1,11 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import {
+	BadRequestException,
+	Injectable,
+	UnauthorizedException,
+} from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { TJwtEmailPayload, TJwtOtpPayload } from "./types/payload";
-import { AuthMessage } from "src/common/enums/messages.enum";
+import { AuthMessage, BadRequestMessage } from "src/common/enums/messages.enum";
 
 @Injectable()
 export class TokenService {
@@ -93,5 +97,29 @@ export class TokenService {
 			secret: process.env.EMAIL_TOKEN_SECRET,
 			expiresIn: 60 * 2, // 2 Mins
 		});
+	}
+
+	/**
+	 * Verify JWT email Token
+	 * @param {string} token - Client's email Token
+	 * @throws {UnauthorizedException} Throws exceptions if the token is invalid or missing.
+	 * @returns {TJwtEmailPayload} - Data object saved in JWT Payload
+	 */
+	verifyEmailToken(token: string): TJwtEmailPayload | never {
+		try {
+			/** Verify email JWT token */
+			const payload = this.jwtService.verify(token, {
+				secret: process.env.EMAIL_TOKEN_SECRET,
+			});
+
+			/** Throw error in case of invalid payload */
+			if (typeof payload !== "object" && !("email" in payload)) {
+				throw new BadRequestException(BadRequestMessage.InvalidToken);
+			}
+
+			return payload;
+		} catch (error) {
+			throw new BadRequestException(BadRequestMessage.InvalidToken);
+		}
 	}
 }

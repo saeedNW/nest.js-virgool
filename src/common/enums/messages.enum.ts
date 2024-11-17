@@ -3,6 +3,8 @@ export enum BadRequestMessage {
 	InvalidAuthMethod = "Invalid auth method",
 	NotExpiredOTP = "OTP code is not expire",
 	InvalidRegisterMethod = "Register method can't be username",
+	InvalidToken = "The verification token is invalid",
+	SomeThingWentWrong = "Some thing went wrong, please retry",
 }
 
 export enum AuthMessage {
@@ -14,6 +16,7 @@ export enum AuthMessage {
 
 export enum NotFoundMessage {
 	Category = "This category was not found",
+	OtpCode = "No otp code for this request has been found",
 }
 
 export enum ConflictMessage {

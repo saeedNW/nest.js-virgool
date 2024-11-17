@@ -6,6 +6,7 @@ import {
 	Get,
 	Patch,
 	Res,
+	Post,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { ApiConsumes, ApiTags } from "@nestjs/swagger";
@@ -22,6 +23,7 @@ import { ApiChangeProfileResponses } from "./decorators/change-profile-responses
 import { ApiGetProfileResponses } from "./decorators/get-profile-responses.decorator";
 import { ChangeEmailDto } from "./dto/change-email.dto";
 import { Response } from "express";
+import { CheckOtpDto } from "../auth/dto/check-otp.dto";
 
 @Controller("user")
 @ApiTags("User")
@@ -87,5 +89,11 @@ export class UserController {
 		@Res({ passthrough: true }) response: Response
 	) {
 		return this.userService.changeEmail(emailDto.email, response);
+	}
+
+	@Post("/verify-email")
+	@ApiConsumes(SwaggerConsumes.URL_ENCODED, SwaggerConsumes.JSON)
+	async verifyEmail(@Body() otpDto: CheckOtpDto) {
+		return this.userService.verifyEmail(otpDto.code);
 	}
 }

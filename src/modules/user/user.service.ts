@@ -1,4 +1,10 @@
-import { ConflictException, Inject, Injectable, Scope } from "@nestjs/common";
+import {
+	BadRequestException,
+	ConflictException,
+	Inject,
+	Injectable,
+	Scope,
+} from "@nestjs/common";
 import { ProfileDto } from "./dto/profile.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserEntity } from "./entities/user.entity";
@@ -11,7 +17,10 @@ import { Gender } from "./enums/gender.enum";
 import { TProfileImages } from "./types/files.type";
 import { uploadFinalization } from "src/common/utils/multer.utils";
 import {
+	AuthMessage,
+	BadRequestMessage,
 	ConflictMessage,
+	NotFoundMessage,
 	SuccessMessage,
 } from "src/common/enums/messages.enum";
 import { AuthService } from "../auth/auth.service";
@@ -30,6 +39,9 @@ export class UserService {
 		/** Register profile repository */
 		@InjectRepository(ProfileEntity)
 		private profileRepository: Repository<ProfileEntity>,
+		/** Register otp repository */
+		@InjectRepository(OtpEntity)
+		private otpRepository: Repository<OtpEntity>,
 		/** Register current request */
 		@Inject(REQUEST) private request: Request,
 		/** Register auth service */
@@ -154,5 +166,72 @@ export class UserService {
 		}
 
 		return responseData;
+	}
+
+	/**
+	 * service of the process of verifying user's email address
+	 * @param {string} code - User's email verification code
+	 */
+	async verifyEmail(code: string) {
+		/** extract user's id and new email address from request */
+		const { id: userId, new_email }: UserEntity = this.request.user;
+
+		/** extract verification token from client's cookies */
+		const token = this.request.signedCookies?.[CookieKeys.EMAIL];
+
+		/** throw error if the token was not found */
+		if (!token) throw new BadRequestException(AuthMessage.ExpiredCode);
+
+		/** verify client's token and extract email address from it */
+		const { email } = this.tokenService.verifyEmailToken(token);
+
+		/** Throw error if the email address in user's data and the email in token was not same */
+		if (email !== new_email) {
+			throw new BadRequestException(BadRequestMessage.SomeThingWentWrong);
+		}
+
+		/** Validate the verification code sent by user by the one saved in database */
+		const otp = await this.checkOtp(userId, code);
+
+		/** throw error if the token method is not related to the email verification process */
+		if (otp.method !== AuthMethod.EMAIL) {
+			throw new BadRequestException(BadRequestMessage.SomeThingWentWrong);
+		}
+
+		/** Update user's data */
+		await this.userRepository.update(
+			{ id: userId },
+			{
+				email,
+				verify_email: true,
+				new_email: null,
+			}
+		);
+
+		return SuccessMessage.Default;
+	}
+
+	/**
+	 * Validate the OTP code sent by user with the one saved in database
+	 * @param userId - User's id
+	 * @param code - the verification code sent by user
+	 * @returns {Promise<OtpEntity>} - Return the OPT data
+	 */
+	async checkOtp(userId: number, code: string): Promise<OtpEntity> {
+		/** Retrieve OTP data from database */
+		const otp: OtpEntity = await this.otpRepository.findOneBy({ userId });
+
+		/** Throw error if the OTP was not found */
+		if (!otp) throw new BadRequestException(NotFoundMessage.OtpCode);
+
+		/** Throw error if the OTP code has expired */
+		if (otp.expires_in < new Date())
+			throw new BadRequestException(AuthMessage.ExpiredCode);
+
+		/** Throw error if the code is invalid */
+		if (otp.code !== code)
+			throw new BadRequestException(AuthMessage.IncorrectCode);
+		
+		return otp;
 	}
 }
