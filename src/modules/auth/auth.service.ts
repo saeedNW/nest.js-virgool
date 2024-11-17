@@ -29,6 +29,7 @@ import { Request, Response } from "express";
 import { CookieKeys } from "src/common/enums/cookies.enum";
 import { TAuthResponse } from "./types/response";
 import { REQUEST } from "@nestjs/core";
+import { tokenCookieOptions } from "src/common/utils/cookie.utils";
 
 @Injectable({ scope: Scope.REQUEST })
 export class AuthService {
@@ -162,11 +163,7 @@ export class AuthService {
 		/** extract data from authentication process result */
 		const { token, code } = result;
 		/** Set a cookie in user browser ti be used in future auth processes */
-		res.cookie(CookieKeys.OTP, token, {
-			httpOnly: true,
-			signed: true,
-			expires: new Date(Date.now() + 1000 * 60 * 2), // 2 Mins
-		});
+		res.cookie(CookieKeys.OTP, token, tokenCookieOptions());
 
 		const responseData = {
 			status: 201,
@@ -223,7 +220,7 @@ export class AuthService {
 			await this.userRepository.update(
 				{ id: userId },
 				{
-					verify_email: true,
+					verify_phone: true,
 				}
 			);
 		}

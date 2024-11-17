@@ -1,16 +1,25 @@
-import { Inject, Injectable, Scope } from "@nestjs/common";
+import { ConflictException, Inject, Injectable, Scope } from "@nestjs/common";
 import { ProfileDto } from "./dto/profile.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserEntity } from "./entities/user.entity";
 import { Repository } from "typeorm";
 import { ProfileEntity } from "./entities/profile.entity";
 import { REQUEST } from "@nestjs/core";
-import { Request } from "express";
+import { Request, Response } from "express";
 import { isDate } from "class-validator";
 import { Gender } from "./enums/gender.enum";
 import { TProfileImages } from "./types/files.type";
 import { uploadFinalization } from "src/common/utils/multer.utils";
-import { SuccessMessage } from "src/common/enums/messages.enum";
+import {
+	ConflictMessage,
+	SuccessMessage,
+} from "src/common/enums/messages.enum";
+import { AuthService } from "../auth/auth.service";
+import { TokenService } from "../auth/tokens.service";
+import { AuthMethod } from "../auth/enums/method.enum";
+import { CookieKeys } from "src/common/enums/cookies.enum";
+import { tokenCookieOptions } from "src/common/utils/cookie.utils";
+import { OtpEntity } from "./entities/otp.entity";
 
 @Injectable({ scope: Scope.REQUEST })
 export class UserService {
@@ -18,13 +27,15 @@ export class UserService {
 		/** Register user repository */
 		@InjectRepository(UserEntity)
 		private userRepository: Repository<UserEntity>,
-
 		/** Register profile repository */
 		@InjectRepository(ProfileEntity)
 		private profileRepository: Repository<ProfileEntity>,
-
 		/** Register current request */
-		@Inject(REQUEST) private request: Request
+		@Inject(REQUEST) private request: Request,
+		/** Register auth service */
+		private authService: AuthService,
+		/** Register token service */
+		private tokenService: TokenService
 	) {}
 
 	/**
@@ -97,5 +108,51 @@ export class UserService {
 			where: { id },
 			relations: ["profile"],
 		});
+	}
+
+	/**
+	 * Service of the process of updating user's email address
+	 * @param email - user's new email address
+	 * @param response - Client's current response
+	 */
+	async changeEmail(email: string, response: Response) {
+		/** extract user's id from request */
+		const { id } = this.request.user;
+
+		/** Retrieve users data by id */
+		const user: UserEntity = await this.userRepository.findOneBy({ email });
+
+		/**
+		 * Throw error if the email is duplicated and don't belong to the user or
+		 * a simple success message if belong to the user
+		 */
+		if (user && id !== user.id) {
+			throw new ConflictException(ConflictMessage.EmailAddress);
+		} else if (user && id === user.id) {
+			return SuccessMessage.Default;
+		}
+
+		/** update user data and save the new email address in the temporary field */
+		await this.userRepository.update({ id }, { new_email: email });
+
+		/** Create and save a new OTP code */
+		const otp: OtpEntity = await this.authService.saveOtp(id, AuthMethod.EMAIL);
+
+		/** Create a new JWT token for further verification */
+		const token: string = this.tokenService.createEmailToken({ email });
+
+		/** Set the token cookie in client's browser */
+		response.cookie(CookieKeys.EMAIL, token, tokenCookieOptions());
+
+		const responseData = {
+			message: SuccessMessage.SendOTP,
+		};
+
+		/** add token and code to response data if project isn't in production */
+		if (process.env?.NODE_ENV !== "production") {
+			responseData["data"] = { code: otp.code, token };
+		}
+
+		return responseData;
 	}
 }

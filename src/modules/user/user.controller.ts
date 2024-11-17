@@ -1,4 +1,12 @@
-import { Controller, Body, Put, UseInterceptors, Get } from "@nestjs/common";
+import {
+	Controller,
+	Body,
+	Put,
+	UseInterceptors,
+	Get,
+	Patch,
+	Res,
+} from "@nestjs/common";
 import { UserService } from "./user.service";
 import { ApiConsumes, ApiTags } from "@nestjs/swagger";
 import { ProfileDto } from "./dto/profile.dto";
@@ -12,6 +20,8 @@ import { UploadedOptionalFiles } from "src/common/decorator/upload-file.decorato
 import { TProfileImages } from "./types/files.type";
 import { ApiChangeProfileResponses } from "./decorators/change-profile-responses.decorator";
 import { ApiGetProfileResponses } from "./decorators/get-profile-responses.decorator";
+import { ChangeEmailDto } from "./dto/change-email.dto";
+import { Response } from "express";
 
 @Controller("user")
 @ApiTags("User")
@@ -63,5 +73,19 @@ export class UserController {
 	@ApiGetProfileResponses()
 	grtProfile() {
 		return this.userService.getProfile();
+	}
+
+	/**
+	 * update user's email process controller
+	 * @param {ChangeEmailDto} emailDto - the data sent by client
+	 * @param {Response} response - Client's current response
+	 */
+	@Patch("/change-email")
+	@ApiConsumes(SwaggerConsumes.URL_ENCODED, SwaggerConsumes.JSON)
+	changeEmail(
+		@Body() emailDto: ChangeEmailDto,
+		@Res({ passthrough: true }) response: Response
+	) {
+		return this.userService.changeEmail(emailDto.email, response);
 	}
 }

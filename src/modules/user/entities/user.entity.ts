@@ -12,6 +12,8 @@ export class UserEntity extends TimestampedEntity {
 	phone: string;
 	@Column({ unique: true, nullable: true })
 	email: string;
+	@Column({ nullable: true })
+	new_email: string;
 	@Column({ nullable: true, default: false })
 	verify_email: boolean;
 	@Column({ nullable: true, default: false })
