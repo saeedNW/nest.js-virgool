@@ -135,4 +135,28 @@ export class TokenService {
 			expiresIn: 60 * 2, // 2 Mins
 		});
 	}
+
+	/**
+	 * Verify JWT phone Token
+	 * @param {string} token - Client's phone Token
+	 * @throws {UnauthorizedException} Throws exceptions if the token is invalid or missing.
+	 * @returns {TJwtPhonePayload} - Data object saved in JWT Payload
+	 */
+	verifyPhoneToken(token: string): TJwtPhonePayload | never {
+		try {
+			/** Verify phone JWT token */
+			const payload = this.jwtService.verify(token, {
+				secret: process.env.PHONE_TOKEN_SECRET,
+			});
+
+			/** Throw error in case of invalid payload */
+			if (typeof payload !== "object" && !("phone" in payload)) {
+				throw new BadRequestException(BadRequestMessage.InvalidToken);
+			}
+
+			return payload;
+		} catch (error) {
+			throw new BadRequestException(BadRequestMessage.InvalidToken);
+		}
+	}
 }

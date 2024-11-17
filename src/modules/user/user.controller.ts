@@ -98,7 +98,7 @@ export class UserController {
 	 */
 	@Post("/verify-email")
 	@ApiConsumes(SwaggerConsumes.URL_ENCODED, SwaggerConsumes.JSON)
-	async verifyEmail(@Body() otpDto: CheckOtpDto) {
+	verifyEmail(@Body() otpDto: CheckOtpDto) {
 		return this.userService.verifyEmail(otpDto.code);
 	}
 
@@ -114,5 +114,15 @@ export class UserController {
 		@Res({ passthrough: true }) response: Response
 	) {
 		return this.userService.changePhone(phoneDto.phone, response);
+	}
+
+	/**
+	 * User's phone OTP verification controller
+	 * @param otpDto - data sent by client
+	 */
+	@Post("/verify-phone")
+	@ApiConsumes(SwaggerConsumes.URL_ENCODED, SwaggerConsumes.JSON)
+	verifyPhone(@Body() otpDto: CheckOtpDto) {
+		return this.userService.verifyPhone(otpDto.code);
 	}
 }

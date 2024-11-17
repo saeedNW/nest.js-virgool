@@ -258,6 +258,49 @@ export class UserService {
 	}
 
 	/**
+	 * service of the process of verifying user's phone number
+	 * @param {string} code - User's phone verification code
+	 */
+	async verifyPhone(code: string) {
+		/** extract user's id and new phone from request */
+		const { id: userId, new_phone }: UserEntity = this.request.user;
+
+		/** extract verification token from client's cookies */
+		const token = this.request.signedCookies?.[CookieKeys.PHONE];
+
+		/** throw error if the token was not found */
+		if (!token) throw new BadRequestException(AuthMessage.ExpiredCode);
+
+		/** verify client's token and extract phone number from it */
+		const { phone } = this.tokenService.verifyPhoneToken(token);
+
+		/** Throw error if the phone address in user's data and the phone in token was not same */
+		if (phone !== new_phone) {
+			throw new BadRequestException(BadRequestMessage.SomeThingWentWrong);
+		}
+
+		/** Validate the verification code sent by user by the one saved in database */
+		const otp = await this.checkOtp(userId, code);
+
+		/** throw error if the token method is not related to the phone verification process */
+		if (otp.method !== AuthMethod.PHONE) {
+			throw new BadRequestException(BadRequestMessage.SomeThingWentWrong);
+		}
+
+		/** Update user's data */
+		await this.userRepository.update(
+			{ id: userId },
+			{
+				phone,
+				verify_phone: true,
+				new_phone: null,
+			}
+		);
+
+		return SuccessMessage.Default;
+	}
+
+	/**
 	 * Validate the OTP code sent by user with the one saved in database
 	 * @param userId - User's id
 	 * @param code - the verification code sent by user
