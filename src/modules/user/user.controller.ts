@@ -25,6 +25,8 @@ import { ChangeEmailDto } from "./dto/change-email.dto";
 import { Response } from "express";
 import { CheckOtpDto } from "../auth/dto/check-otp.dto";
 import { ChangePhoneDto } from "./dto/change-phone.dto";
+import { ApiChangeEmailAndPhoneResponses } from "./decorators/change-emai-phone-responses.decorator";
+import { ApiVerifyEmailAndPhoneResponses } from "./decorators/verify-email-phone-responses.decorator";
 
 @Controller("user")
 @ApiTags("User")
@@ -85,6 +87,7 @@ export class UserController {
 	 */
 	@Patch("/change-email")
 	@ApiConsumes(SwaggerConsumes.URL_ENCODED, SwaggerConsumes.JSON)
+	@ApiChangeEmailAndPhoneResponses()
 	changeEmail(
 		@Body() emailDto: ChangeEmailDto,
 		@Res({ passthrough: true }) response: Response
@@ -98,6 +101,7 @@ export class UserController {
 	 */
 	@Post("/verify-email")
 	@ApiConsumes(SwaggerConsumes.URL_ENCODED, SwaggerConsumes.JSON)
+	@ApiVerifyEmailAndPhoneResponses()
 	verifyEmail(@Body() otpDto: CheckOtpDto) {
 		return this.userService.verifyEmail(otpDto.code);
 	}
@@ -108,6 +112,7 @@ export class UserController {
 	 * @param {Response} response - Client's current response
 	 */
 	@Patch("/change-phone")
+	@ApiChangeEmailAndPhoneResponses()
 	@ApiConsumes(SwaggerConsumes.URL_ENCODED, SwaggerConsumes.JSON)
 	changePhone(
 		@Body() phoneDto: ChangePhoneDto,
@@ -122,6 +127,7 @@ export class UserController {
 	 */
 	@Post("/verify-phone")
 	@ApiConsumes(SwaggerConsumes.URL_ENCODED, SwaggerConsumes.JSON)
+	@ApiVerifyEmailAndPhoneResponses()
 	verifyPhone(@Body() otpDto: CheckOtpDto) {
 		return this.userService.verifyPhone(otpDto.code);
 	}

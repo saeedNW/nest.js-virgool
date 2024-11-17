@@ -42,3 +42,13 @@ export class GetProfileSuccess extends OkApiBaseResponse {
 	})
 	data: UserEntity;
 }
+
+/**
+ * Update email and phone process success response
+ */
+export class ChangeEmailAndPhoneSuccess extends OkApiBaseResponse {}
+
+/**
+ * verify email and phone process success response
+ */
+export class VerifyEmailAndPhoneSuccess extends OkApiBaseResponse {}
