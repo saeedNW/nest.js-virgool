@@ -45,14 +45,6 @@ export class ResponseTransformerInterceptor implements NestInterceptor {
 					delete data["message"];
 				}
 
-				/** Check if the data is and object with a statusCode property */
-				if (typeof data === "object" && "statusCode" in data) {
-					/** extract the statusCode property value and store it to statusCode */
-					statusCode = (data as { statusCode: number }).statusCode;
-					/** remove the statusCode property from data object */
-					delete data["statusCode"];
-				}
-
 				/** return a simple text response if data was empty */
 				if (!data || Object.keys(data).length <= 0) {
 					return {

@@ -26,13 +26,17 @@ export class AuthController {
 	/**
 	 * users' login/register process controller
 	 * @param {AuthDto} authDto - Data sent by client
+	 * @param {Responses} res - Client's current response
 	 */
 	@Post("user-existence")
 	//? Define swagger input type
 	@ApiConsumes(SwaggerConsumes.URL_ENCODED, SwaggerConsumes.JSON)
 	//? use a custom decorator for swagger response examples to keep the controller code clean
 	@ApiUserExistenceResponses()
-	userExistence(@Body() authDto: AuthDto, @Res() res: Response) {
+	userExistence(
+		@Body() authDto: AuthDto,
+		@Res({ passthrough: true }) res: Response
+	) {
 		/** filter client data and remove unwanted data */
 		const filteredData = plainToClass(AuthDto, authDto, {
 			excludeExtraneousValues: true,

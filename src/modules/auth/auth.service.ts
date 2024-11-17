@@ -166,7 +166,6 @@ export class AuthService {
 		res.cookie(CookieKeys.OTP, token, tokenCookieOptions());
 
 		const responseData = {
-			status: 201,
 			success: true,
 			message: SuccessMessage.SendOTP,
 		};
@@ -176,7 +175,7 @@ export class AuthService {
 			responseData["data"] = { code, token };
 		}
 
-		return res.json(responseData);
+		return responseData;
 	}
 
 	async checkOtp(code: string) {
