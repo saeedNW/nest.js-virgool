@@ -301,6 +301,33 @@ export class UserService {
 	}
 
 	/**
+	 * Service of the process of updating user's username
+	 * @param {string} username - Username sent by user
+	 */
+	async changeUsername(username: string) {
+		/** extract user's id from request */
+		const { id } = this.request.user;
+
+		/** Retrieve users data by username */
+		const user: UserEntity = await this.userRepository.findOneBy({ username });
+
+		/**
+		 * Throw error if the username is duplicated and don't belong to the user or
+		 * a simple success message if belong to the user
+		 */
+		if (user && user?.id !== id) {
+			throw new ConflictException(ConflictMessage.Username);
+		} else if (user && user.id == id) {
+			return SuccessMessage.Default;
+		}
+
+		/** update user data */
+		await this.userRepository.update({ id }, { username });
+
+		return SuccessMessage.Default;
+	}
+
+	/**
 	 * Validate the OTP code sent by user with the one saved in database
 	 * @param userId - User's id
 	 * @param code - the verification code sent by user

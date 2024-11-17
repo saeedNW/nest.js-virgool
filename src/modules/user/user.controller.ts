@@ -27,6 +27,8 @@ import { CheckOtpDto } from "../auth/dto/check-otp.dto";
 import { ChangePhoneDto } from "./dto/change-phone.dto";
 import { ApiChangeEmailAndPhoneResponses } from "./decorators/change-emai-phone-responses.decorator";
 import { ApiVerifyEmailAndPhoneResponses } from "./decorators/verify-email-phone-responses.decorator";
+import { ChangeUsernameDto } from "./dto/change-username.dto";
+import { ApiChangeUsernameResponses } from "./decorators/change-username-responses.decorator";
 
 @Controller("user")
 @ApiTags("User")
@@ -123,12 +125,23 @@ export class UserController {
 
 	/**
 	 * User's phone OTP verification controller
-	 * @param otpDto - data sent by client
+	 * @param {CheckOtpDto} otpDto - data sent by client
 	 */
 	@Post("/verify-phone")
 	@ApiConsumes(SwaggerConsumes.URL_ENCODED, SwaggerConsumes.JSON)
 	@ApiVerifyEmailAndPhoneResponses()
 	verifyPhone(@Body() otpDto: CheckOtpDto) {
 		return this.userService.verifyPhone(otpDto.code);
+	}
+
+	/**
+	 * update user's username process controller
+	 * @param {ChangeUsernameDto} usernameDto - Username sent by user
+	 */
+	@Patch("/change-username")
+	@ApiConsumes(SwaggerConsumes.URL_ENCODED, SwaggerConsumes.JSON)
+	@ApiChangeUsernameResponses()
+	async changeUsername(@Body() usernameDto: ChangeUsernameDto) {
+		return this.userService.changeUsername(usernameDto.username);
 	}
 }

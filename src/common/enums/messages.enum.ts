@@ -24,6 +24,7 @@ export enum ConflictMessage {
 	accountInfo = "Your account has already been registered",
 	EmailAddress = "Duplicated email address",
 	PhoneNumber = "Duplicated phone number",
+	Username = "Duplicated username",
 }
 
 export enum ValidationMessage {

@@ -52,3 +52,8 @@ export class ChangeEmailAndPhoneSuccess extends OkApiBaseResponse {}
  * verify email and phone process success response
  */
 export class VerifyEmailAndPhoneSuccess extends OkApiBaseResponse {}
+
+/**
+ * change username process success response
+ */
+export class ChangeUsernameSuccess extends OkApiBaseResponse {}
