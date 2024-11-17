@@ -10,6 +10,8 @@ import { multerImageUploader } from "src/common/utils/multer.utils";
 import { AuthDecorator } from "src/common/decorator/auth.decorator";
 import { UploadedOptionalFiles } from "src/common/decorator/upload-file.decorator";
 import { TProfileImages } from "./types/files.type";
+import { ApiChangeProfileResponses } from "./decorators/change-profile-responses.decorator";
+import { ApiGetProfileResponses } from "./decorators/get-profile-responses.decorator";
 
 @Controller("user")
 @ApiTags("User")
@@ -17,14 +19,25 @@ import { TProfileImages } from "./types/files.type";
 export class UserController {
 	constructor(private readonly userService: UserService) {}
 
+	/**
+	 * Controller of the process of updating user profile information
+	 * @param {TProfileImages} files - Optional uploaded files
+	 * @param {ProfileDto} profileDto - Profile data sent by user to be updated
+	 */
 	@Put("/profile")
 	@ApiConsumes(SwaggerConsumes.MULTIPART_FORM_DATA)
+	@ApiChangeProfileResponses()
+	//? In order to register file uploader on an endpoint it should be register as an interceptor
 	@UseInterceptors(
+		//? NestJS core interceptor to activate the upload process on an endpoint
 		FileFieldsInterceptor(
+			//? Define the name of the fields which will upload a file from and how many files
+			//? are suppose to be uploaded from each
 			[
 				{ name: "profile_image", maxCount: 1 },
 				{ name: "profile_bg_image", maxCount: 1 },
 			],
+			//? Register Upload manager function
 			multerImageUploader()
 		)
 	)
@@ -43,7 +56,11 @@ export class UserController {
 		return this.userService.changeProfile(files, filteredData);
 	}
 
+	/**
+	 * Controller of the process of retrieving user's profile data
+	 */
 	@Get("/profile")
+	@ApiGetProfileResponses()
 	grtProfile() {
 		return this.userService.getProfile();
 	}

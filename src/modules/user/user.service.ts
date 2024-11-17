@@ -27,6 +27,11 @@ export class UserService {
 		@Inject(REQUEST) private request: Request
 	) {}
 
+	/**
+	 * Service of the process of updating user profile information
+	 * @param {TProfileImages} files - Optional uploaded files
+	 * @param {ProfileDto} profileDto - Profile data sent by user to be updated
+	 */
 	async changeProfile(files: TProfileImages, profileDto: ProfileDto) {
 		/** Extract user's data from request */
 		const { id: userId, profileId } = this.request.user;
@@ -80,9 +85,14 @@ export class UserService {
 		return SuccessMessage.Default;
 	}
 
+	/**
+	 * Service of the process of retrieving user's profile data
+	 */
 	async getProfile() {
+		/** extract user's id from request */
 		const { id } = this.request.user;
 
+		/** Retrieve and return user's profile data */
 		return this.userRepository.findOne({
 			where: { id },
 			relations: ["profile"],
