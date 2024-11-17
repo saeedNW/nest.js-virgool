@@ -5,9 +5,13 @@ import { UnprocessableEntityPipe } from "./common/pipe/unprocessable-entity.pipe
 import { ResponseTransformerInterceptor } from "./common/interceptor/response-transformer.interceptor";
 import { swaggerConfiguration } from "./config/swagger.config";
 import * as cookieParser from "cookie-parser";
+import { NestExpressApplication } from "@nestjs/platform-express";
 
 async function bootstrap() {
-	const app = await NestFactory.create(AppModule);
+	const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+	/** Register public folder as static files directory */
+	app.useStaticAssets("public");
 
 	/** initialize custom exception filter */
 	app.useGlobalFilters(new HttpExceptionFilter());
