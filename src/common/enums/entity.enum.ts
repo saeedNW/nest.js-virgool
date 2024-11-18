@@ -4,4 +4,8 @@ export enum EntityName {
 	PROFILE = "profile",
 	OTP = "otp",
 	CATEGORY = "category",
+	BLOG = "blog",
+	BLOG_LIKES = "blog_likes",
+	BLOG_COMMENTS = "blog_comments",
+	BLOG_BOOKMARKS = "blog_bookmarks",
 }

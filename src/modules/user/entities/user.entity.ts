@@ -1,8 +1,12 @@
-import { Column, Entity, JoinColumn, OneToOne } from "typeorm";
+import { Column, Entity, JoinColumn, OneToMany, OneToOne } from "typeorm";
 import { EntityName } from "src/common/enums/entity.enum";
 import { TimestampedEntity } from "src/common/abstracts/base.entity";
 import { OtpEntity } from "./otp.entity";
 import { ProfileEntity } from "./profile.entity";
+import { BlogEntity } from "src/modules/blog/entities/blog.entity";
+import { BlogLikesEntity } from "src/modules/blog/entities/like.entity";
+import { BlogBookmarkEntity } from "src/modules/blog/entities/bookmark.entity";
+import { BlogCommentEntity } from "src/modules/blog/entities/comments.entity";
 
 @Entity(EntityName.USER)
 export class UserEntity extends TimestampedEntity {
@@ -32,4 +36,12 @@ export class UserEntity extends TimestampedEntity {
 	@OneToOne(() => ProfileEntity, (profile) => profile.user, { nullable: true })
 	@JoinColumn()
 	profile: ProfileEntity;
+	@OneToMany(() => BlogEntity, (blog) => blog.author)
+	blogs: BlogEntity[];
+	@OneToMany(() => BlogLikesEntity, (like) => like.user)
+	blog_likes: BlogLikesEntity[];
+	@OneToMany(() => BlogBookmarkEntity, (bookmark) => bookmark.user)
+	blog_bookmarks: BlogBookmarkEntity[];
+	@OneToMany(() => BlogCommentEntity, (comment) => comment.user)
+	blog_comments: BlogCommentEntity[];
 }
