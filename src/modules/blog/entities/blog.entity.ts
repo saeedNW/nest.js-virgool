@@ -19,6 +19,10 @@ export class BlogEntity extends TimestampedEntity {
 	image: string;
 	@Column({ default: BlogStatus.DRAFT })
 	status: string;
+	@Column({ unique: true })
+	slug: string;
+	@Column()
+	time_for_study: string;
 	@Column()
 	authorId: number;
 	@ManyToOne(() => UserEntity, (user) => user.blogs, { onDelete: "CASCADE" })
@@ -30,10 +34,6 @@ export class BlogEntity extends TimestampedEntity {
 	@OneToMany(() => BlogCommentEntity, (comment) => comment.blog)
 	comments: BlogCommentEntity[];
 
-	// @Column({ unique: true })
-	// slug: string;
-	// @Column()
-	// time_for_study: string;
 	// @OneToMany(() => BlogCategoryEntity, (category) => category.blog)
 	// categories: BlogCategoryEntity[];
 }
