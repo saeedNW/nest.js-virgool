@@ -8,6 +8,8 @@ import { isJWT } from "class-validator";
 import { Request } from "express";
 import { AuthMessage } from "src/common/enums/messages.enum";
 import { AuthService } from "../auth.service";
+import { Reflector } from "@nestjs/core";
+import { SKIP_AUTH } from "src/common/decorator/skip-auth.decorator";
 
 /**
  * Guard to protect routes by validating access tokens.
@@ -22,9 +24,30 @@ import { AuthService } from "../auth.service";
  */
 @Injectable()
 export class AuthGuard implements CanActivate {
-	constructor(private authService: AuthService) {}
+	constructor(
+		/** Register auth service */
+		private authService: AuthService,
+		/** Register reflector which contains request's metadata */
+		private reflector: Reflector
+	) {}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> | never {
+		/**
+		 * Check is the skip authorization metadata has been set.
+		 * ? This metadata normally won't be set on a class or variable, but
+		 * ? it will be set on a request controller's method which is consider
+		 * ? as a handler. So we need to retrieve the metadata names "SKIP_AUTH"
+		 * ? in the context handler data which is the method that the "SkipAuth"
+		 * ? decorator has been set for.
+		 */
+		const skippedAuth = this.reflector.get<boolean>(
+			SKIP_AUTH,
+			context.getHandler()
+		);
+
+		/** Skip authorization process if asked to */
+		if (skippedAuth) return true;
+
 		/** convert context to HTTP */
 		const httpContext = context.switchToHttp();
 		/** retrieve request object */
