@@ -8,6 +8,9 @@ import { BlogStatus } from "./enums/status.enum";
 import { REQUEST } from "@nestjs/core";
 import { Request } from "express";
 import { SuccessMessage } from "src/common/enums/messages.enum";
+import { PaginationDto } from "src/common/dto/pagination.dto";
+import { FindBlogsDto } from "./dto/filter.dto";
+import { paginate, Pagination } from "nestjs-typeorm-paginate";
 
 @Injectable({ scope: Scope.REQUEST })
 export class BlogService {
@@ -73,6 +76,26 @@ export class BlogService {
 			order: {
 				id: "DESC",
 			},
+		});
+	}
+
+	/**
+	 * Retrieve all blogs list
+	 * @param {PaginationDto} paginationDto - Pagination data such as page and limit
+	 * @param {FindBlogsDto} filterDto - Filter data sent by user
+	 * @returns {Promise<BlogEntity[]>} - Paginated blogs list
+	 */
+	async blogsList(
+		paginationDto: PaginationDto,
+		filterDto: FindBlogsDto
+	): Promise<Pagination<BlogEntity>> {
+		const queryBuilder = this.blogRepository
+			.createQueryBuilder("blog")
+			.orderBy("id", "DESC");
+
+		return await paginate<BlogEntity>(queryBuilder, {
+			...paginationDto,
+			route: process.env.SERVER_LINK + "/blog",
 		});
 	}
 

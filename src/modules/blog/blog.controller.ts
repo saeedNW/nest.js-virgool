@@ -1,10 +1,13 @@
-import { Body, Controller, Get, Post } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query } from "@nestjs/common";
 import { BlogService } from "./blog.service";
 import { CreateBlogDto } from "./dto/create-blog.dto";
 import { plainToClass } from "class-transformer";
-import { ApiConsumes, ApiTags } from "@nestjs/swagger";
+import { ApiConsumes, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { SwaggerConsumes } from "src/common/enums/swagger-consumes.enum";
 import { AuthDecorator } from "src/common/decorator/auth.decorator";
+import { FindBlogsDto } from "./dto/filter.dto";
+import { PaginationDto } from "src/common/dto/pagination.dto";
+import { SkipAuth } from "src/common/decorator/skip-auth.decorator";
 
 @Controller("blog")
 @ApiTags("Blogs")
@@ -33,5 +36,28 @@ export class BlogController {
 	@Get("/mine")
 	myBlogs() {
 		return this.blogService.myBlogs();
+	}
+
+	@Get("/")
+	@SkipAuth()
+	@ApiOperation({ description: "Note: Authorization not needed" })
+	find(
+		@Query() paginationDto: PaginationDto,
+		@Query() filterDto: FindBlogsDto
+	) {
+		/** filter client pagination data and remove unwanted data */
+		const filteredPaginationData = plainToClass(PaginationDto, paginationDto, {
+			excludeExtraneousValues: true,
+		});
+
+		/** filter client search data and remove unwanted data */
+		const filteredSearchData = plainToClass(FindBlogsDto, filterDto, {
+			excludeExtraneousValues: true,
+		});
+
+		return this.blogService.blogsList(
+			filteredPaginationData,
+			filteredSearchData
+		);
 	}
 }
