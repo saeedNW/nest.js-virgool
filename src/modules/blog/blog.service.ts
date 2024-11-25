@@ -33,7 +33,7 @@ export class BlogService {
 
 		/** Create a valid slug */
 		let slugDate = slug ?? title;
-		createBlogDto.slug = createSlug(slugDate);
+		slug = createSlug(slugDate);
 
 		/** Check if slug exists */
 		const isExist = await this.checkBlogBySlug(slug);
@@ -46,6 +46,7 @@ export class BlogService {
 		/** Create a new blog */
 		let blog: BlogEntity = this.blogRepository.create({
 			...createBlogDto,
+			slug,
 			status: BlogStatus.DRAFT,
 			authorId: user.id,
 		});
@@ -54,6 +55,25 @@ export class BlogService {
 		blog = await this.blogRepository.save(blog);
 
 		return SuccessMessage.Default;
+	}
+
+	/**
+	 * Retrieve user's blogs
+	 * @returns {Promise<BlogEntity[]>} - User's blogs data
+	 */
+	async myBlogs(): Promise<BlogEntity[]> {
+		/** Retrieve user's id from request */
+		const { id: userId } = this.request.user;
+
+		/** Retrieve user's blogs from database */
+		return this.blogRepository.find({
+			where: {
+				authorId: userId,
+			},
+			order: {
+				id: "DESC",
+			},
+		});
 	}
 
 	/**

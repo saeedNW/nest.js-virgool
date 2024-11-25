@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Get, Post } from "@nestjs/common";
 import { BlogService } from "./blog.service";
 import { CreateBlogDto } from "./dto/create-blog.dto";
 import { plainToClass } from "class-transformer";
@@ -12,6 +12,10 @@ import { AuthDecorator } from "src/common/decorator/auth.decorator";
 export class BlogController {
 	constructor(private readonly blogService: BlogService) {}
 
+	/**
+	 * New blog creation process
+	 * @param createBlogDto - Blog data sent by user
+	 */
 	@Post("/")
 	@ApiConsumes(SwaggerConsumes.URL_ENCODED, SwaggerConsumes.JSON)
 	create(@Body() createBlogDto: CreateBlogDto) {
@@ -21,5 +25,13 @@ export class BlogController {
 		});
 
 		return this.blogService.create(filteredData);
+	}
+
+	/**
+	 * Retrieve user's blogs
+	 */
+	@Get("/mine")
+	myBlogs() {
+		return this.blogService.myBlogs();
 	}
 }
