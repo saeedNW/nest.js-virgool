@@ -21,7 +21,7 @@ export function stringToArray(
 			return [...new Set(field.split(",").map((item) => item.trim()))];
 		} else {
 			/** If neither '#' nor ',' is found, create a single-item array. Remove duplicated items */
-			return [...new Set(field.trim())];
+			return [field.trim()];
 		}
 	}
 
