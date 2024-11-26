@@ -14,4 +14,8 @@ export class PaginationDto {
 	@IsNumber()
 	@Expose()
 	limit: number;
+
+	get skip() {
+		return (this.page - 1) * this.limit;
+	}
 }

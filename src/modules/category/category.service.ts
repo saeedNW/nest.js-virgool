@@ -14,7 +14,7 @@ import {
 	SuccessMessage,
 } from "src/common/enums/messages.enum";
 import { PaginationDto } from "src/common/dto/pagination.dto";
-import { paginate, Pagination } from "nestjs-typeorm-paginate";
+import { paginate, PaginatedResult } from "../../common/utils/pagination.utils";
 
 @Injectable()
 export class CategoryService {
@@ -63,16 +63,13 @@ export class CategoryService {
 	/**
 	 * Retrieve categories data in pagination
 	 * @param {PaginationDto} paginationDto - Pagination data such as page and limit
-	 * @returns {Promise<Pagination<CategoryEntity>>} Founded data plus pagination meta data
+	 * @returns {Promise<PaginatedResult<CategoryEntity>>} Founded data plus pagination meta data
 	 */
 	async findAll(
 		paginationDto: PaginationDto
-	): Promise<Pagination<CategoryEntity>> {
+	): Promise<PaginatedResult<CategoryEntity>> {
 		/** Retrieve categories using `paginate method from `nestjs-typeorm-paginate` module */
-		return paginate<CategoryEntity>(this.categoryRepository, {
-			...paginationDto,
-			route: process.env.SERVER_LINK,
-		});
+		return await paginate(paginationDto, this.categoryRepository);
 	}
 
 	/**
