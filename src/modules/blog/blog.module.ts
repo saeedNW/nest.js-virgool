@@ -7,6 +7,7 @@ import { BlogLikesEntity } from "./entities/like.entity";
 import { BlogBookmarkEntity } from "./entities/bookmark.entity";
 import { BlogCommentEntity } from "./entities/comments.entity";
 import { AuthModule } from "../auth/auth.module";
+import { BlogCategoryEntity } from "./entities/blog-category.entity";
 
 @Module({
 	imports: [
@@ -16,6 +17,7 @@ import { AuthModule } from "../auth/auth.module";
 			BlogLikesEntity,
 			BlogBookmarkEntity,
 			BlogCommentEntity,
+			BlogCategoryEntity
 		]),
 	],
 	controllers: [BlogController],

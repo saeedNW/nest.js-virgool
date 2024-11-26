@@ -6,6 +6,7 @@ import { UserEntity } from "src/modules/user/entities/user.entity";
 import { BlogLikesEntity } from "./like.entity";
 import { BlogBookmarkEntity } from "./bookmark.entity";
 import { BlogCommentEntity } from "./comments.entity";
+import { BlogCategoryEntity } from "./blog-category.entity";
 
 @Entity(EntityName.BLOG)
 export class BlogEntity extends TimestampedEntity {
@@ -33,7 +34,6 @@ export class BlogEntity extends TimestampedEntity {
 	bookmarks: BlogBookmarkEntity[];
 	@OneToMany(() => BlogCommentEntity, (comment) => comment.blog)
 	comments: BlogCommentEntity[];
-
-	// @OneToMany(() => BlogCategoryEntity, (category) => category.blog)
-	// categories: BlogCategoryEntity[];
+	@OneToMany(() => BlogCategoryEntity, (category) => category.blog)
+	categories: BlogCategoryEntity[];
 }
