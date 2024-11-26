@@ -49,6 +49,18 @@ export class CategoryService {
 	}
 
 	/**
+	 * add new category by its title
+	 * @param {string} title - category data sent by user
+	 * @returns {Promise<CategoryEntity>} - Return newly added category data
+	 */
+	async insertByTitle(title: string): Promise<CategoryEntity> {
+		/** Create an instance of category entity by given data */
+		const category = this.categoryRepository.create({ title });
+		/** Save category data in database */
+		return this.categoryRepository.save(category);
+	}
+
+	/**
 	 * Retrieve categories data in pagination
 	 * @param {PaginationDto} paginationDto - Pagination data such as page and limit
 	 * @returns {Promise<Pagination<CategoryEntity>>} Founded data plus pagination meta data
@@ -75,6 +87,16 @@ export class CategoryService {
 		if (!category) throw new NotFoundException(NotFoundMessage.Category);
 		/** return category's data object */
 		return category;
+	}
+
+	/**
+	 * Retrieve single category by title
+	 * @param {string} title category's title
+	 * @returns {Promise<CategoryEntity>} Single category data object
+	 */
+	async findOneByTitle(title: string): Promise<CategoryEntity> {
+		/** Retrieve category's data from database */
+		return await this.categoryRepository.findOneBy({ title });
 	}
 
 	async update(id: number, updateCategoryDto: UpdateCategoryDto) {

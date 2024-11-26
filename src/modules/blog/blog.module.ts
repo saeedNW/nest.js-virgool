@@ -8,6 +8,8 @@ import { BlogBookmarkEntity } from "./entities/bookmark.entity";
 import { BlogCommentEntity } from "./entities/comments.entity";
 import { AuthModule } from "../auth/auth.module";
 import { BlogCategoryEntity } from "./entities/blog-category.entity";
+import { CategoryService } from "../category/category.service";
+import { CategoryEntity } from "../category/entities/category.entity";
 
 @Module({
 	imports: [
@@ -17,10 +19,11 @@ import { BlogCategoryEntity } from "./entities/blog-category.entity";
 			BlogLikesEntity,
 			BlogBookmarkEntity,
 			BlogCommentEntity,
-			BlogCategoryEntity
+			BlogCategoryEntity,
+			CategoryEntity,
 		]),
 	],
 	controllers: [BlogController],
-	providers: [BlogService],
+	providers: [BlogService, CategoryService],
 })
 export class BlogModule {}

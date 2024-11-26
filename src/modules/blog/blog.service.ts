@@ -11,6 +11,8 @@ import { SuccessMessage } from "src/common/enums/messages.enum";
 import { PaginationDto } from "src/common/dto/pagination.dto";
 import { FindBlogsDto } from "./dto/filter.dto";
 import { paginate, Pagination } from "nestjs-typeorm-paginate";
+import { CategoryService } from "../category/category.service";
+import { BlogCategoryEntity } from "./entities/blog-category.entity";
 
 @Injectable({ scope: Scope.REQUEST })
 export class BlogService {
@@ -19,8 +21,15 @@ export class BlogService {
 		@InjectRepository(BlogEntity)
 		private blogRepository: Repository<BlogEntity>,
 
+		/** Register blog category repository */
+		@InjectRepository(BlogCategoryEntity)
+		private blogCategoryRepository: Repository<BlogCategoryEntity>,
+
 		/** Register current request */
-		@Inject(REQUEST) private request: Request
+		@Inject(REQUEST) private request: Request,
+
+		/** Register category service */
+		private categoryService: CategoryService
 	) {}
 
 	/**
@@ -32,7 +41,7 @@ export class BlogService {
 		const user = this.request.user;
 
 		/** Extract slug and title from sent data */
-		let { slug, title } = createBlogDto;
+		let { slug, title, categories } = createBlogDto;
 
 		/** Create a valid slug */
 		let slugDate = slug ?? title;
@@ -49,6 +58,7 @@ export class BlogService {
 		/** Create a new blog */
 		let blog: BlogEntity = this.blogRepository.create({
 			...createBlogDto,
+			categories: [],
 			slug,
 			status: BlogStatus.DRAFT,
 			authorId: user.id,
@@ -56,6 +66,23 @@ export class BlogService {
 
 		/** Save blog data in database */
 		blog = await this.blogRepository.save(blog);
+
+		/** manage blog's categories */
+		for (const categoryTitle of categories) {
+			/** Retrieve category's data */
+			let category = await this.categoryService.findOneByTitle(categoryTitle);
+
+			/** Create the category if it was not found */
+			if (!category) {
+				category = await this.categoryService.insertByTitle(categoryTitle);
+			}
+
+			/** Save categories data in database */
+			await this.blogCategoryRepository.insert({
+				blogId: blog.id,
+				categoryId: category.id,
+			});
+		}
 
 		return SuccessMessage.Default;
 	}
