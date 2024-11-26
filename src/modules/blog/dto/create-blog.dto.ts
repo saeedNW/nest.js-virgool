@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Expose, Transform } from "class-transformer";
 import { IsArray, IsNotEmpty, IsNumberString, Length } from "class-validator";
-import { stringToArray } from "src/common/utils/string-to-array";
+import { stringToArray } from "src/common/utils/string-to-array.utils";
 
 export class CreateBlogDto {
 	@ApiProperty()
