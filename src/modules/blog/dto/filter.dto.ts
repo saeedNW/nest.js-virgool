@@ -5,4 +5,8 @@ export class FindBlogsDto {
 	@ApiPropertyOptional()
 	@Expose()
 	search: string;
+
+	@ApiPropertyOptional()
+	@Expose()
+	category: string;
 }

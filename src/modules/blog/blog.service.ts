@@ -10,9 +10,10 @@ import { Request } from "express";
 import { SuccessMessage } from "src/common/enums/messages.enum";
 import { PaginationDto } from "src/common/dto/pagination.dto";
 import { FindBlogsDto } from "./dto/filter.dto";
-import { paginate, Pagination } from "nestjs-typeorm-paginate";
 import { CategoryService } from "../category/category.service";
 import { BlogCategoryEntity } from "./entities/blog-category.entity";
+import { paginate, PaginatedResult } from "src/common/utils/pagination.utils";
+import { EntityName } from "src/common/enums/entity.enum";
 
 @Injectable({ scope: Scope.REQUEST })
 export class BlogService {
@@ -110,20 +111,43 @@ export class BlogService {
 	 * Retrieve all blogs list
 	 * @param {PaginationDto} paginationDto - Pagination data such as page and limit
 	 * @param {FindBlogsDto} filterDto - Filter data sent by user
-	 * @returns {Promise<BlogEntity[]>} - Paginated blogs list
+	 * @returns {Promise<PaginatedResult<BlogEntity>>} - Paginated blogs list
 	 */
 	async blogsList(
 		paginationDto: PaginationDto,
 		filterDto: FindBlogsDto
-	): Promise<Pagination<BlogEntity>> {
-		const queryBuilder = this.blogRepository
-			.createQueryBuilder("blog")
-			.orderBy("id", "DESC");
+	): Promise<PaginatedResult<BlogEntity>> {
+		/** Destructure filter data */
+		let { category, search } = filterDto;
 
-		return await paginate<BlogEntity>(queryBuilder, {
-			...paginationDto,
-			route: process.env.SERVER_LINK + "/blog",
-		});
+		/** Define a temporary variable which will save database query where option */
+		let where = "";
+
+		/** Add category value to query's where in case it was provided */
+		if (category) {
+			category = category.toLowerCase();
+			if (where.length > 0) where += " AND ";
+			where += "category.title ILIKE :category";
+		}
+
+		/** Add search value to query's where in case it was provided */
+		if (search) {
+			if (where.length > 0) where += " AND ";
+			search = `%${search}%`;
+			where +=
+				"CONCAT(blog.title, blog.description, blog.content) ILIKE :search";
+		}
+
+		/** Generate database query */
+		const queryBuilder = this.blogRepository
+			.createQueryBuilder(EntityName.BLOG)
+			.leftJoin("blog.categories", "categories")
+			.leftJoin("categories.category", "category")
+			.addSelect(["categories.id", "category.title"])
+			.where(where, { category, search })
+			.orderBy("blog.id", "DESC");
+
+		return await paginate(paginationDto, this.blogRepository, queryBuilder);
 	}
 
 	/**
