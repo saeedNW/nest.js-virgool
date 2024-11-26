@@ -1,4 +1,4 @@
-import { Inject, Injectable, Scope } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException, Scope } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { BlogEntity } from "./entities/blog.entity";
 import { Repository } from "typeorm";
@@ -7,7 +7,10 @@ import { createSlug, randomId } from "src/common/utils/functions.utils";
 import { BlogStatus } from "./enums/status.enum";
 import { REQUEST } from "@nestjs/core";
 import { Request } from "express";
-import { SuccessMessage } from "src/common/enums/messages.enum";
+import {
+	NotFoundMessage,
+	SuccessMessage,
+} from "src/common/enums/messages.enum";
 import { PaginationDto } from "src/common/dto/pagination.dto";
 import { FindBlogsDto } from "./dto/filter.dto";
 import { CategoryService } from "../category/category.service";
@@ -148,6 +151,33 @@ export class BlogService {
 			.orderBy("blog.id", "DESC");
 
 		return await paginate(paginationDto, this.blogRepository, queryBuilder);
+	}
+
+	/**
+	 * Blog removal process
+	 * @param {number} id =Blog's id value
+	 */
+	async delete(id: number): Promise<string> {
+		/** Check blog existence */
+		await this.checkExistBlogById(id);
+		/** Delete blog from database */
+		await this.blogRepository.delete({ id });
+
+		return SuccessMessage.Default;
+	}
+
+	/**
+	 * Check if a blog exists with the give id
+	 * @param {number} id =Blog's id value
+	 * @returns {Promise<BlogEntity>} - Blog data
+	 */
+	async checkExistBlogById(id: number): Promise<BlogEntity> {
+		/** Retrieve blog data from database */
+		const blog = await this.blogRepository.findOneBy({ id });
+		/** Throw error if the blog was not found */
+		if (!blog) throw new NotFoundException(NotFoundMessage.Blog);
+
+		return blog;
 	}
 
 	/**

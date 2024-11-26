@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query } from "@nestjs/common";
 import { BlogService } from "./blog.service";
 import { CreateBlogDto } from "./dto/create-blog.dto";
 import { plainToClass } from "class-transformer";
@@ -38,6 +38,9 @@ export class BlogController {
 		return this.blogService.myBlogs();
 	}
 
+	/**
+	 * Retrieve blogs list by filter and search
+	 */
 	@Get("/")
 	@SkipAuth()
 	@ApiOperation({ description: "Note: Authorization not needed" })
@@ -59,5 +62,13 @@ export class BlogController {
 			filteredPaginationData,
 			filteredSearchData
 		);
+	}
+
+	/**
+	 * Blog removal process
+	 */
+	@Delete("/:id")
+	delete(@Param("id", ParseIntPipe) id: number) {
+		return this.blogService.delete(id);
 	}
 }

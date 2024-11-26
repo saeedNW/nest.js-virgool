@@ -15,6 +15,7 @@ export enum AuthMessage {
 }
 
 export enum NotFoundMessage {
+	Blog = "This blog was not found",
 	Category = "This category was not found",
 	OtpCode = "No otp code for this request has been found",
 }
