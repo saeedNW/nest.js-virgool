@@ -5,6 +5,8 @@ export enum BadRequestMessage {
 	InvalidRegisterMethod = "Register method can't be username",
 	InvalidToken = "The verification token is invalid",
 	SomeThingWentWrong = "Some thing went wrong, please retry",
+	AlreadyAcceptedComment = "This comment has already been accepted",
+	AlreadyRejectedComment = "This comment has already been rejected",
 }
 
 export enum AuthMessage {
@@ -16,6 +18,7 @@ export enum AuthMessage {
 
 export enum NotFoundMessage {
 	Blog = "This blog was not found",
+	Comment = "This comment was not found",
 	Category = "This category was not found",
 	OtpCode = "No otp code for this request has been found",
 }

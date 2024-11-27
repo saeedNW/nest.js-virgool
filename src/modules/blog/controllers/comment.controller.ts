@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query } from "@nestjs/common";
 import { ApiConsumes, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { AuthDecorator } from "src/common/decorator/auth.decorator";
 import { BlogCommentService } from "../services/comment.service";
@@ -42,5 +42,21 @@ export class BlogCommentController {
 		});
 
 		return this.commentService.commentsList(filteredPaginationData);
+	}
+
+	/**
+	 * accept comment (Change accepted status to true)
+	 */
+	@Put("/accept/:id")
+	accept(@Param("id", ParseIntPipe) id: number) {
+		return this.commentService.accept(id);
+	}
+
+	/**
+	 * reject comment (Change accepted status to false)
+	 */
+	@Put("/reject/:id")
+	reject(@Param("id", ParseIntPipe) id: number) {
+		return this.commentService.reject(id);
 	}
 }
