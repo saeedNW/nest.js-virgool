@@ -69,7 +69,12 @@ export class CategoryService {
 		paginationDto: PaginationDto
 	): Promise<PaginatedResult<CategoryEntity>> {
 		/** Retrieve categories using `paginate method from `nestjs-typeorm-paginate` module */
-		return await paginate(paginationDto, this.categoryRepository);
+		return await paginate(
+			paginationDto,
+			this.categoryRepository,
+			undefined,
+			process.env.SERVER_LINK + "/category"
+		);
 	}
 
 	/**

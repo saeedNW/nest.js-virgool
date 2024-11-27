@@ -83,7 +83,8 @@ export class BlogCommentService {
 		return await paginate(
 			paginationDto,
 			this.blogCommentRepository,
-			queryBuilder
+			queryBuilder,
+			process.env.SERVER_LINK + "/blog-comment"
 		);
 	}
 }

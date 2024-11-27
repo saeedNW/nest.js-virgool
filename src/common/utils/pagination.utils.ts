@@ -43,6 +43,7 @@ export interface PaginatedResult<T> {
  * @param {PaginationDto} paginationDto - DTO containing pagination parameters (page, limit, and skip).
  * @param {Repository<T>} repository - The repository for the entity.
  * @param {SelectQueryBuilder<T>} [queryBuilder] - Optional query builder for custom queries.
+ * @param {string} [link] - The endpoint to which the data retrieved from.
  * @param {boolean} [distinct=false] - Whether to count distinct items only (useful for complex queries).
  * @returns {Promise<PaginatedResult<T>>} A promise that resolves to a paginated result object.
  */
@@ -50,6 +51,7 @@ export async function paginate<T>(
 	paginationDto: PaginationDto,
 	repository: Repository<T>,
 	queryBuilder?: SelectQueryBuilder<T>,
+	link?: string,
 	distinct: boolean = false
 ): Promise<PaginatedResult<T>> {
 	let totalItems: number; // Total number of items across all pages
@@ -87,34 +89,39 @@ export async function paginate<T>(
 			totalPages: Math.ceil(totalItems / paginationDto.limit),
 			currentPage: paginationDto.page,
 		},
-		links: getPaginationLinks(paginationDto, totalItems),
+		links: getPaginationLinks(link, paginationDto, totalItems),
 	};
 }
 
 /**
  * Generate pagination navigation links.
  *
+ * @param {string} link - The endpoint to which the data retrieved from.
  * @param {PaginationDto} paginationDto - DTO containing pagination parameters (page, limit, etc.).
  * @param {number} totalItems - Total number of items across all pages.
  * @returns {PaginationLinks} An object containing navigation links.
  */
 function getPaginationLinks(
+	link: string,
 	paginationDto: PaginationDto,
 	totalItems: number
 ): PaginationLinks {
+	// Return undefined if link was not provided
+	if (!link) return undefined;
+
 	const totalPages = Math.ceil(totalItems / paginationDto.limit);
 
 	// Generate links for navigation
 	return {
-		first: `${process.env.SERVER_LINK}/resource?page=1&limit=${paginationDto.limit}`,
+		first: `${link}?page=1&limit=${paginationDto.limit}`,
 		previous:
 			paginationDto.page > 1
-				? `${process.env.SERVER_LINK}/resource?page=${paginationDto.page - 1}&limit=${paginationDto.limit}`
+				? `${link}?page=${paginationDto.page - 1}&limit=${paginationDto.limit}`
 				: "",
 		next:
 			paginationDto.page < totalPages
-				? `${process.env.SERVER_LINK}/resource?page=${paginationDto.page + 1}&limit=${paginationDto.limit}`
+				? `${link}?page=${paginationDto.page + 1}&limit=${paginationDto.limit}`
 				: "",
-		last: `${process.env.SERVER_LINK}/resource?page=${totalPages}&limit=${paginationDto.limit}`,
+		last: `${link}?page=${totalPages}&limit=${paginationDto.limit}`,
 	};
 }

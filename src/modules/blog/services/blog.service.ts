@@ -164,7 +164,12 @@ export class BlogService {
 			)
 			.orderBy("blog.id", "DESC");
 
-		return await paginate(paginationDto, this.blogRepository, queryBuilder);
+		return await paginate(
+			paginationDto,
+			this.blogRepository,
+			queryBuilder,
+			process.env.SERVER_LINK + "/blog"
+		);
 	}
 
 	/**
