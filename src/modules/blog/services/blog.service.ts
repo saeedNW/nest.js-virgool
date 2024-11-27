@@ -1,10 +1,10 @@
 import { Inject, Injectable, NotFoundException, Scope } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { BlogEntity } from "./entities/blog.entity";
+import { BlogEntity } from "../entities/blog.entity";
 import { Repository } from "typeorm";
-import { CreateBlogDto } from "./dto/create-blog.dto";
+import { CreateBlogDto } from "../dto/create-blog.dto";
 import { createSlug, randomId } from "src/common/utils/functions.utils";
-import { BlogStatus } from "./enums/status.enum";
+import { BlogStatus } from "../enums/status.enum";
 import { REQUEST } from "@nestjs/core";
 import { Request } from "express";
 import {
@@ -12,15 +12,15 @@ import {
 	SuccessMessage,
 } from "src/common/enums/messages.enum";
 import { PaginationDto } from "src/common/dto/pagination.dto";
-import { FindBlogsDto } from "./dto/filter.dto";
-import { CategoryService } from "../category/category.service";
-import { BlogCategoryEntity } from "./entities/blog-category.entity";
+import { FindBlogsDto } from "../dto/filter.dto";
+import { CategoryService } from "../../category/category.service";
+import { BlogCategoryEntity } from "../entities/blog-category.entity";
 import { paginate, PaginatedResult } from "src/common/utils/pagination.utils";
 import { EntityName } from "src/common/enums/entity.enum";
-import { UpdateBlogDto } from "./dto/update-blog.dto";
+import { UpdateBlogDto } from "../dto/update-blog.dto";
 import { isArray } from "class-validator";
-import { BlogLikesEntity } from "./entities/like.entity";
-import { BlogBookmarkEntity } from "./entities/bookmark.entity";
+import { BlogLikesEntity } from "../entities/like.entity";
+import { BlogBookmarkEntity } from "../entities/bookmark.entity";
 
 @Injectable({ scope: Scope.REQUEST })
 export class BlogService {

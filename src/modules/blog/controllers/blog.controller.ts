@@ -9,16 +9,16 @@ import {
 	Put,
 	Query,
 } from "@nestjs/common";
-import { BlogService } from "./blog.service";
-import { CreateBlogDto } from "./dto/create-blog.dto";
+import { BlogService } from "../services/blog.service";
+import { CreateBlogDto } from "../dto/create-blog.dto";
 import { plainToClass } from "class-transformer";
 import { ApiConsumes, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { SwaggerConsumes } from "src/common/enums/swagger-consumes.enum";
 import { AuthDecorator } from "src/common/decorator/auth.decorator";
-import { FindBlogsDto } from "./dto/filter.dto";
+import { FindBlogsDto } from "../dto/filter.dto";
 import { PaginationDto } from "src/common/dto/pagination.dto";
 import { SkipAuth } from "src/common/decorator/skip-auth.decorator";
-import { UpdateBlogDto } from "./dto/update-blog.dto";
+import { UpdateBlogDto } from "../dto/update-blog.dto";
 import { deleteInvalidPropertyInObject } from "src/common/utils/functions.utils";
 
 @Controller("blog")
