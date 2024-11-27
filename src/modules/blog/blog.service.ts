@@ -17,6 +17,8 @@ import { CategoryService } from "../category/category.service";
 import { BlogCategoryEntity } from "./entities/blog-category.entity";
 import { paginate, PaginatedResult } from "src/common/utils/pagination.utils";
 import { EntityName } from "src/common/enums/entity.enum";
+import { UpdateBlogDto } from "./dto/update-blog.dto";
+import { isArray } from "class-validator";
 
 @Injectable({ scope: Scope.REQUEST })
 export class BlogService {
@@ -72,21 +74,7 @@ export class BlogService {
 		blog = await this.blogRepository.save(blog);
 
 		/** manage blog's categories */
-		for (const categoryTitle of categories) {
-			/** Retrieve category's data */
-			let category = await this.categoryService.findOneByTitle(categoryTitle);
-
-			/** Create the category if it was not found */
-			if (!category) {
-				category = await this.categoryService.insertByTitle(categoryTitle);
-			}
-
-			/** Save categories data in database */
-			await this.blogCategoryRepository.insert({
-				blogId: blog.id,
-				categoryId: category.id,
-			});
-		}
+		await this.updateBlogCategories(blog.id, categories);
 
 		return SuccessMessage.Default;
 	}
@@ -167,11 +155,105 @@ export class BlogService {
 	}
 
 	/**
+	 * Process of updating blog's data
+	 * @param {number} id - Blog's id number
+	 * @param {UpdateBlogDto} updateBlogDto - Blog's updated data
+	 */
+	async update(id: number, updateBlogDto: UpdateBlogDto) {
+		/** Extract new data from sent data */
+		let {
+			title,
+			slug: inputSlug,
+			content,
+			description,
+			image,
+			time_for_study,
+			categories,
+		} = updateBlogDto;
+
+		/** Check if slug exists and retrieve it */
+		const blog = await this.checkExistBlogById(id);
+
+		/** Create new slug based on given data */
+		let slug =
+			(inputSlug && createSlug(inputSlug)) ||
+			(title && createSlug(title)) ||
+			blog.slug;
+
+		/** Proceed if the blog's current slug was updated */
+		if (slug !== blog.slug) {
+			/** Check if the new slug already exists */
+			const isExist = await this.checkBlogBySlug(slug);
+
+			/** Add a random id to slug value if it was duplicated */
+			if (isExist && isExist.id !== id) {
+				slug += `-${randomId()}`;
+			}
+
+			/** Update blog's slug value */
+			blog.slug = slug;
+		}
+
+		/** Merge updated fields into the existing blog object */
+		Object.assign(blog, {
+			title: title || blog.title,
+			description: description || blog.description,
+			content: content || blog.content,
+			image: image || blog.image,
+			time_for_study: time_for_study || blog.time_for_study,
+		});
+
+		/** Save updated blog data */
+		await this.blogRepository.save(blog);
+
+		/** manage blog's categories */
+		if (isArray(categories) && categories.length > 0) {
+			await this.updateBlogCategories(blog.id, categories, true);
+		}
+
+		return SuccessMessage.Default;
+	}
+
+	/**
+	 * Update blog categories
+	 * @param {number} blogId - Blog's id number
+	 * @param {string[] | string} categoryTitles - The Array of categories title
+	 * @param {boolean} updateProcess - Determine whether this method was called during blog update process of not
+	 */
+	private async updateBlogCategories(
+		blogId: number,
+		categoryTitles: string[] | string,
+		updateProcess: boolean = false
+	) {
+		/** Remove existing categories for the blog */
+		if (updateProcess) {
+			await this.blogCategoryRepository.delete({ blogId });
+		}
+
+		// Process each category
+		for (const categoryTitle of categoryTitles) {
+			/** Retrieve category's data */
+			let category = await this.categoryService.findOneByTitle(categoryTitle);
+
+			/** Create the category if it was not found */
+			if (!category) {
+				category = await this.categoryService.insertByTitle(categoryTitle);
+			}
+
+			/** Save categories data in database */
+			await this.blogCategoryRepository.insert({
+				blogId,
+				categoryId: category.id,
+			});
+		}
+	}
+
+	/**
 	 * Check if a blog exists with the give id
 	 * @param {number} id =Blog's id value
 	 * @returns {Promise<BlogEntity>} - Blog data
 	 */
-	async checkExistBlogById(id: number): Promise<BlogEntity> {
+	private async checkExistBlogById(id: number): Promise<BlogEntity> {
 		/** Retrieve blog data from database */
 		const blog = await this.blogRepository.findOneBy({ id });
 		/** Throw error if the blog was not found */
@@ -185,7 +267,7 @@ export class BlogService {
 	 * @param {string } slug =Blog's slug value
 	 * @returns {Promise<BlogEntity>} - Blog data
 	 */
-	async checkBlogBySlug(slug: string): Promise<BlogEntity> {
+	private async checkBlogBySlug(slug: string): Promise<BlogEntity> {
 		/** Retrieve blog data from database */
 		const blog: BlogEntity = await this.blogRepository.findOneBy({ slug });
 

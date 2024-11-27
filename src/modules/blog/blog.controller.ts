@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query } from "@nestjs/common";
 import { BlogService } from "./blog.service";
 import { CreateBlogDto } from "./dto/create-blog.dto";
 import { plainToClass } from "class-transformer";
@@ -8,6 +8,8 @@ import { AuthDecorator } from "src/common/decorator/auth.decorator";
 import { FindBlogsDto } from "./dto/filter.dto";
 import { PaginationDto } from "src/common/dto/pagination.dto";
 import { SkipAuth } from "src/common/decorator/skip-auth.decorator";
+import { UpdateBlogDto } from "./dto/update-blog.dto";
+import { deleteInvalidPropertyInObject } from "src/common/utils/functions.utils";
 
 @Controller("blog")
 @ApiTags("Blogs")
@@ -70,5 +72,22 @@ export class BlogController {
 	@Delete("/:id")
 	delete(@Param("id", ParseIntPipe) id: number) {
 		return this.blogService.delete(id);
+	}
+
+	@Put("/:id")
+	@ApiConsumes(SwaggerConsumes.URL_ENCODED, SwaggerConsumes.JSON)
+	update(
+		@Param("id", ParseIntPipe) id: number,
+		@Body() updateBlogDto: UpdateBlogDto
+	) {
+		/** filter client data and remove unwanted data */
+		const filteredData = plainToClass(UpdateBlogDto, updateBlogDto, {
+			excludeExtraneousValues: true,
+		});
+
+		/** Remove invalid data */
+		deleteInvalidPropertyInObject(filteredData);
+
+		return this.blogService.update(id, filteredData);
 	}
 }
