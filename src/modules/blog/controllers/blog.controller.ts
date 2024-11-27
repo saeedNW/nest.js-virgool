@@ -77,6 +77,15 @@ export class BlogController {
 	}
 
 	/**
+	 * Blog bookmark process
+	 */
+	@Get("/by-slug/:slug")
+	// @SkipAuth()
+	findOneBySlug(@Param("slug") slug: string) {
+		return this.blogService.findOneBySlug(slug);
+	}
+
+	/**
 	 * Blog removal process
 	 */
 	@Delete("/:id")

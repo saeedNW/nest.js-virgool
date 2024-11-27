@@ -300,6 +300,62 @@ export class BlogService {
 	}
 
 	/**
+	 * Retrieve single blog with its slug value
+	 * @param slug - Blog's slug
+	 */
+	async findOneBySlug(slug: string): Promise<BlogEntity> {
+		/** Extract user's id from request */
+		const userId = this.request?.user?.id;
+
+		/** Retrieve blog data */
+		const blog = await this.blogRepository
+			.createQueryBuilder(EntityName.BLOG)
+			.leftJoin("blog.categories", "categories")
+			.leftJoin("categories.category", "category")
+			.leftJoin("blog.author", "author")
+			.leftJoin("author.profile", "profile")
+			.addSelect([
+				"categories.id",
+				"category.title",
+				"author.username",
+				"author.id",
+				"profile.nickname",
+			])
+			.where({ slug })
+			.loadRelationCountAndMap("blog.likes", "blog.likes")
+			.loadRelationCountAndMap("blog.bookmarks", "blog.bookmarks")
+			.leftJoinAndSelect(
+				"blog.comments",
+				"comments",
+				"comments.accepted = :accepted",
+				{ accepted: true }
+			)
+			.getOne();
+
+		/** Throw error if the blog was not found */
+		if (!blog) {
+			throw new NotFoundException(NotFoundMessage.Blog);
+		}
+
+		/** Check if the blog is liked by the user */
+		const isLiked = !!(await this.blogLikeRepository.findOneBy({
+			userId,
+			blogId: blog.id,
+		}));
+
+		/** Check if the blog is bookmarked by the user */
+		const isBookmarked = !!(await this.blogBookmarkRepository.findOneBy({
+			userId,
+			blogId: blog.id,
+		}));
+
+		/** Add like and bookmark status to blog's data */
+		Object.assign(blog, { isLiked, isBookmarked });
+
+		return blog;
+	}
+
+	/**
 	 * Update blog categories
 	 * @param {number} blogId - Blog's id number
 	 * @param {string[] | string} categoryTitles - The Array of categories title
