@@ -111,4 +111,12 @@ export class BlogController {
 	likeBlog(@Param("id", ParseIntPipe) id: number) {
 		return this.blogService.likeBlog(id);
 	}
+
+	/**
+	 * Blog bookmark process
+	 */
+	@Get("/bookmark/:id")
+	bookmarkBlog(@Param("id", ParseIntPipe) id: number) {
+		return this.blogService.bookmarkBlog(id);
+	}
 }

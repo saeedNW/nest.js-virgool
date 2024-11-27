@@ -20,6 +20,7 @@ import { EntityName } from "src/common/enums/entity.enum";
 import { UpdateBlogDto } from "./dto/update-blog.dto";
 import { isArray } from "class-validator";
 import { BlogLikesEntity } from "./entities/like.entity";
+import { BlogBookmarkEntity } from "./entities/bookmark.entity";
 
 @Injectable({ scope: Scope.REQUEST })
 export class BlogService {
@@ -35,6 +36,10 @@ export class BlogService {
 		/** Register blog like repository */
 		@InjectRepository(BlogLikesEntity)
 		private blogLikeRepository: Repository<BlogLikesEntity>,
+
+		/** Register blog like repository */
+		@InjectRepository(BlogBookmarkEntity)
+		private blogBookmarkRepository: Repository<BlogBookmarkEntity>,
 
 		/** Register current request */
 		@Inject(REQUEST) private request: Request,
@@ -150,6 +155,7 @@ export class BlogService {
 			])
 			.where(where, { category, search })
 			.loadRelationCountAndMap("blog.likes", "blog.likes")
+			.loadRelationCountAndMap("blog.bookmarks", "blog.bookmarks")
 			.orderBy("blog.id", "DESC");
 
 		return await paginate(paginationDto, this.blogRepository, queryBuilder);
@@ -236,7 +242,6 @@ export class BlogService {
 		/** Extract user's id from request */
 		const { id: userId } = this.request.user;
 
-		// return {userId};
 		/** Check if the blog exists */
 		await this.checkExistBlogById(id);
 
@@ -251,6 +256,33 @@ export class BlogService {
 			await this.blogLikeRepository.insert({ userId, blogId: id });
 		} else {
 			await this.blogLikeRepository.delete({ id: isLiked.id });
+		}
+
+		return SuccessMessage.Default;
+	}
+
+	/**
+	 * The process of toggling blog's bookmark
+	 * @param id - Blogs id number
+	 */
+	async bookmarkBlog(id: number) {
+		/** Extract user's id from request */
+		const { id: userId } = this.request.user;
+
+		/** Check if the blog exists */
+		await this.checkExistBlogById(id);
+
+		/** Check if the blog is bookmarked already */
+		const isBookmarked = await this.blogBookmarkRepository.findOneBy({
+			userId,
+			blogId: id,
+		});
+
+		/** bookmark the blog if it's not bookmarked before OR remove from bookmark it if it's bookmarked */
+		if (!isBookmarked) {
+			await this.blogBookmarkRepository.insert({ userId, blogId: id });
+		} else {
+			await this.blogBookmarkRepository.delete({ id: isBookmarked.id });
 		}
 
 		return SuccessMessage.Default;
