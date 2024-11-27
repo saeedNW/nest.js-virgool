@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query } from "@nestjs/common";
+import {
+	Body,
+	Controller,
+	Delete,
+	Get,
+	Param,
+	ParseIntPipe,
+	Post,
+	Put,
+	Query,
+} from "@nestjs/common";
 import { BlogService } from "./blog.service";
 import { CreateBlogDto } from "./dto/create-blog.dto";
 import { plainToClass } from "class-transformer";
@@ -74,6 +84,9 @@ export class BlogController {
 		return this.blogService.delete(id);
 	}
 
+	/**
+	 * Blog update process
+	 */
 	@Put("/:id")
 	@ApiConsumes(SwaggerConsumes.URL_ENCODED, SwaggerConsumes.JSON)
 	update(
@@ -89,5 +102,13 @@ export class BlogController {
 		deleteInvalidPropertyInObject(filteredData);
 
 		return this.blogService.update(id, filteredData);
+	}
+
+	/**
+	 * Blog like process
+	 */
+	@Get("/like/:id")
+	likeBlog(@Param("id", ParseIntPipe) id: number) {
+		return this.blogService.likeBlog(id);
 	}
 }

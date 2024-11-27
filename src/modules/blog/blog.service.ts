@@ -19,6 +19,7 @@ import { paginate, PaginatedResult } from "src/common/utils/pagination.utils";
 import { EntityName } from "src/common/enums/entity.enum";
 import { UpdateBlogDto } from "./dto/update-blog.dto";
 import { isArray } from "class-validator";
+import { BlogLikesEntity } from "./entities/like.entity";
 
 @Injectable({ scope: Scope.REQUEST })
 export class BlogService {
@@ -30,6 +31,10 @@ export class BlogService {
 		/** Register blog category repository */
 		@InjectRepository(BlogCategoryEntity)
 		private blogCategoryRepository: Repository<BlogCategoryEntity>,
+
+		/** Register blog like repository */
+		@InjectRepository(BlogLikesEntity)
+		private blogLikeRepository: Repository<BlogLikesEntity>,
 
 		/** Register current request */
 		@Inject(REQUEST) private request: Request,
@@ -134,8 +139,17 @@ export class BlogService {
 			.createQueryBuilder(EntityName.BLOG)
 			.leftJoin("blog.categories", "categories")
 			.leftJoin("categories.category", "category")
-			.addSelect(["categories.id", "category.title"])
+			.leftJoin("blog.author", "author")
+			.leftJoin("author.profile", "profile")
+			.addSelect([
+				"categories.id",
+				"category.title",
+				"author.username",
+				"author.id",
+				"profile.nickname",
+			])
 			.where(where, { category, search })
+			.loadRelationCountAndMap("blog.likes", "blog.likes")
 			.orderBy("blog.id", "DESC");
 
 		return await paginate(paginationDto, this.blogRepository, queryBuilder);
@@ -209,6 +223,34 @@ export class BlogService {
 		/** manage blog's categories */
 		if (isArray(categories) && categories.length > 0) {
 			await this.updateBlogCategories(blog.id, categories, true);
+		}
+
+		return SuccessMessage.Default;
+	}
+
+	/**
+	 * The process of toggling blog's like
+	 * @param id - Blogs id number
+	 */
+	async likeBlog(id: number) {
+		/** Extract user's id from request */
+		const { id: userId } = this.request.user;
+
+		// return {userId};
+		/** Check if the blog exists */
+		await this.checkExistBlogById(id);
+
+		/** Check if the blog is liked already */
+		const isLiked = await this.blogLikeRepository.findOneBy({
+			userId,
+			blogId: id,
+		});
+
+		/** Like the blog if it's not liked before OR dislike it if it's liked */
+		if (!isLiked) {
+			await this.blogLikeRepository.insert({ userId, blogId: id });
+		} else {
+			await this.blogLikeRepository.delete({ id: isLiked.id });
 		}
 
 		return SuccessMessage.Default;
