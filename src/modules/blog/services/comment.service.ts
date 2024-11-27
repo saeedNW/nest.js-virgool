@@ -8,6 +8,9 @@ import { REQUEST } from "@nestjs/core";
 import { Request } from "express";
 import { BlogService } from "./blog.service";
 import { SuccessMessage } from "src/common/enums/messages.enum";
+import { PaginationDto } from "src/common/dto/pagination.dto";
+import { paginate, PaginatedResult } from "src/common/utils/pagination.utils";
+import { EntityName } from "src/common/enums/entity.enum";
 
 @Injectable({ scope: Scope.REQUEST })
 export class BlogCommentService {
@@ -35,7 +38,7 @@ export class BlogCommentService {
 		/** Extract user's id from request */
 		const { id: userId } = this.request.user;
 
-		/** Destructure the comments data */	
+		/** Destructure the comments data */
 		const { parentId, text, blogId } = createCommentDto;
 
 		/** Check if the blog exists */
@@ -57,5 +60,30 @@ export class BlogCommentService {
 		});
 
 		return SuccessMessage.Default;
+	}
+
+	/**
+	 * Retrieve all comments list
+	 * @param {PaginationDto} paginationDto - Pagination data such as page and limit
+	 * @returns {Promise<PaginatedResult<BlogEntity>>} - Paginated comments list
+	 */
+	async commentsList(
+		paginationDto: PaginationDto
+	): Promise<PaginatedResult<BlogCommentEntity>> {
+		/** Generate database query */
+		const queryBuilder = this.blogCommentRepository
+			.createQueryBuilder(EntityName.BLOG_COMMENTS)
+			.leftJoin("blog_comments.blog", "blog")
+			.leftJoin("blog_comments.user", "user")
+			.leftJoin("user.profile", "profile")
+			.addSelect(["blog.title", "user.username", "profile.nickname"])
+			// .where("blog_comments.accepted= :accepted", { accepted: true })
+			.orderBy("blog_comments.id", "DESC");
+
+		return await paginate(
+			paginationDto,
+			this.blogCommentRepository,
+			queryBuilder
+		);
 	}
 }

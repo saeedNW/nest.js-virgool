@@ -1,10 +1,12 @@
-import { Body, Controller, Post } from "@nestjs/common";
-import { ApiConsumes, ApiTags } from "@nestjs/swagger";
+import { Body, Controller, Get, Post, Query } from "@nestjs/common";
+import { ApiConsumes, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { AuthDecorator } from "src/common/decorator/auth.decorator";
 import { BlogCommentService } from "../services/comment.service";
 import { SwaggerConsumes } from "src/common/enums/swagger-consumes.enum";
 import { CreateCommentDto } from "../dto/create-comment.dto";
 import { plainToClass } from "class-transformer";
+import { SkipAuth } from "src/common/decorator/skip-auth.decorator";
+import { PaginationDto } from "src/common/dto/pagination.dto";
 
 @Controller("blog-comment")
 @ApiTags("Blog Comments")
@@ -25,5 +27,20 @@ export class BlogCommentController {
 		});
 
 		return this.commentService.create(filteredData);
+	}
+
+	/**
+	 * Retrieve comments list by filter and search
+	 */
+	@Get("/")
+	@SkipAuth()
+	@ApiOperation({ description: "Note: Authorization not needed" })
+	find(@Query() paginationDto: PaginationDto) {
+		/** filter client pagination data and remove unwanted data */
+		const filteredPaginationData = plainToClass(PaginationDto, paginationDto, {
+			excludeExtraneousValues: true,
+		});
+
+		return this.commentService.commentsList(filteredPaginationData);
 	}
 }
