@@ -156,6 +156,12 @@ export class BlogService {
 			.where(where, { category, search })
 			.loadRelationCountAndMap("blog.likes", "blog.likes")
 			.loadRelationCountAndMap("blog.bookmarks", "blog.bookmarks")
+			.loadRelationCountAndMap(
+				"blog.comments",
+				"blog.comments",
+				"comments",
+				(qb) => qb.where("comments.accepted= :accepted", { accepted: true })
+			)
 			.orderBy("blog.id", "DESC");
 
 		return await paginate(paginationDto, this.blogRepository, queryBuilder);
@@ -327,7 +333,7 @@ export class BlogService {
 	 * @param {number} id =Blog's id value
 	 * @returns {Promise<BlogEntity>} - Blog data
 	 */
-	private async checkExistBlogById(id: number): Promise<BlogEntity> {
+	async checkExistBlogById(id: number): Promise<BlogEntity> {
 		/** Retrieve blog data from database */
 		const blog = await this.blogRepository.findOneBy({ id });
 		/** Throw error if the blog was not found */
@@ -341,7 +347,7 @@ export class BlogService {
 	 * @param {string } slug =Blog's slug value
 	 * @returns {Promise<BlogEntity>} - Blog data
 	 */
-	private async checkBlogBySlug(slug: string): Promise<BlogEntity> {
+	async checkBlogBySlug(slug: string): Promise<BlogEntity> {
 		/** Retrieve blog data from database */
 		const blog: BlogEntity = await this.blogRepository.findOneBy({ slug });
 

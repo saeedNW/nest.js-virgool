@@ -10,6 +10,8 @@ import { AuthModule } from "../auth/auth.module";
 import { BlogCategoryEntity } from "./entities/blog-category.entity";
 import { CategoryService } from "../category/category.service";
 import { CategoryEntity } from "../category/entities/category.entity";
+import { BlogCommentController } from "./controllers/comment.controller";
+import { BlogCommentService } from "./services/comment.service";
 
 @Module({
 	imports: [
@@ -23,7 +25,7 @@ import { CategoryEntity } from "../category/entities/category.entity";
 			CategoryEntity,
 		]),
 	],
-	controllers: [BlogController],
-	providers: [BlogService, CategoryService],
+	controllers: [BlogController, BlogCommentController],
+	providers: [BlogService, CategoryService, BlogCommentService],
 })
 export class BlogModule {}
