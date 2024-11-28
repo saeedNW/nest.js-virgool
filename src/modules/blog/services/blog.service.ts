@@ -1,4 +1,10 @@
-import { Inject, Injectable, NotFoundException, Scope } from "@nestjs/common";
+import {
+	forwardRef,
+	Inject,
+	Injectable,
+	NotFoundException,
+	Scope,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { BlogEntity } from "../entities/blog.entity";
 import { Repository } from "typeorm";
@@ -21,6 +27,7 @@ import { UpdateBlogDto } from "../dto/update-blog.dto";
 import { isArray } from "class-validator";
 import { BlogLikesEntity } from "../entities/like.entity";
 import { BlogBookmarkEntity } from "../entities/bookmark.entity";
+import { BlogCommentService } from "./comment.service";
 
 @Injectable({ scope: Scope.REQUEST })
 export class BlogService {
@@ -45,7 +52,29 @@ export class BlogService {
 		@Inject(REQUEST) private request: Request,
 
 		/** Register category service */
-		private categoryService: CategoryService
+		private categoryService: CategoryService,
+
+		/**
+		 * Register blog comment service
+		 *
+		 * ? Circular dependency alert: The BlogService and BlogCommentService
+		 * ? import each other, creating a circular dependency.
+		 *
+		 * ? Circular dependencies can occur when two services, such as BlogService
+		 * ? and BlogCommentService, depend on each other. This can lead to an error
+		 * ? that prevents the application from starting.
+		 *
+		 * ? In such cases, the `forwardRef` utility can be used to resolve the issue.
+		 * ? By wrapping a dependency with `forwardRef` and combining it with the
+		 * ? `@Inject` decorator, NestJS can delay the resolution of the dependency
+		 * ? until it is needed. This approach is particularly useful when two modules
+		 * ? or services reference each other directly.
+		 *
+		 * ? Refer to the NestJS documentation for more details on using `forwardRef`
+		 * ? effectively in scenarios involving circular dependencies.
+		 */
+		@Inject(forwardRef(() => BlogCommentService))
+		private blogCommentService: BlogCommentService
 	) {}
 
 	/**
@@ -303,7 +332,7 @@ export class BlogService {
 	 * Retrieve single blog with its slug value
 	 * @param slug - Blog's slug
 	 */
-	async findOneBySlug(slug: string): Promise<BlogEntity> {
+	async findOneBySlug(slug: string, paginationDto: PaginationDto) {
 		/** Extract user's id from request */
 		const userId = this.request?.user?.id;
 
@@ -324,18 +353,17 @@ export class BlogService {
 			.where({ slug })
 			.loadRelationCountAndMap("blog.likes", "blog.likes")
 			.loadRelationCountAndMap("blog.bookmarks", "blog.bookmarks")
-			.leftJoinAndSelect(
-				"blog.comments",
-				"comments",
-				"comments.accepted = :accepted",
-				{ accepted: true }
-			)
 			.getOne();
 
 		/** Throw error if the blog was not found */
 		if (!blog) {
 			throw new NotFoundException(NotFoundMessage.Blog);
 		}
+
+		const commentsData = await this.blogCommentService.findCommentsOfBlog(
+			blog.id,
+			paginationDto
+		);
 
 		/** Check if the blog is liked by the user */
 		const isLiked = !!(await this.blogLikeRepository.findOneBy({
@@ -350,7 +378,7 @@ export class BlogService {
 		}));
 
 		/** Add like and bookmark status to blog's data */
-		Object.assign(blog, { isLiked, isBookmarked });
+		Object.assign(blog, { commentsData, isLiked, isBookmarked });
 
 		return blog;
 	}

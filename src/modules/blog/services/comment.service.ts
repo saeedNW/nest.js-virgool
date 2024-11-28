@@ -1,5 +1,6 @@
 import {
 	BadRequestException,
+	forwardRef,
 	Inject,
 	Injectable,
 	NotFoundException,
@@ -8,7 +9,7 @@ import {
 import { CreateCommentDto } from "../dto/create-comment.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { BlogEntity } from "../entities/blog.entity";
-import { Repository } from "typeorm";
+import { IsNull, Repository } from "typeorm";
 import { BlogCommentEntity } from "../entities/comments.entity";
 import { REQUEST } from "@nestjs/core";
 import { Request } from "express";
@@ -36,7 +37,26 @@ export class BlogCommentService {
 		/** Register current request */
 		@Inject(REQUEST) private request: Request,
 
-		/** Register blog service */
+		/**
+		 * Register blog service
+		 *
+		 * ? Circular dependency alert: The BlogService and BlogCommentService
+		 * ? import each other, creating a circular dependency.
+		 *
+		 * ? Circular dependencies can occur when two services, such as BlogService
+		 * ? and BlogCommentService, depend on each other. This can lead to an error
+		 * ? that prevents the application from starting.
+		 *
+		 * ? In such cases, the `forwardRef` utility can be used to resolve the issue.
+		 * ? By wrapping a dependency with `forwardRef` and combining it with the
+		 * ? `@Inject` decorator, NestJS can delay the resolution of the dependency
+		 * ? until it is needed. This approach is particularly useful when two modules
+		 * ? or services reference each other directly.
+		 *
+		 * ? Refer to the NestJS documentation for more details on using `forwardRef`
+		 * ? effectively in scenarios involving circular dependencies.
+		 */
+		@Inject(forwardRef(() => BlogService))
 		private blogService: BlogService
 	) {}
 
@@ -96,6 +116,120 @@ export class BlogCommentService {
 			queryBuilder,
 			process.env.SERVER_LINK + "/blog-comment"
 		);
+	}
+
+	/**
+	 * Retrieve all comments that are belong to a certain blog post
+	 * @param {number} blogId - The Id of the blog that its comments are requested
+	 * @param {PaginationDto} paginationDto - Pagination data such as page and limit
+	 * @returns {Promise<PaginatedResult<BlogCommentEntity>>} - Paginated comments list
+	 */
+	async findCommentsOfBlog(
+		blogId: number,
+		paginationDto: PaginationDto
+	): Promise<PaginatedResult<BlogCommentEntity>> {
+		/**
+		 * Generate database query
+		 * ? NOTE: The `createQueryBuilder` API in TypeORM is not inherently designed
+		 * ? to handle deeply nested relations dynamically. To retrieve such nested
+		 * ? relations, you must explicitly define each relationship at every level.
+		 *
+		 * ? If dynamic handling of deeply nested relations is required, consider
+		 * ? alternative approaches. One option is to fetch all comments and their
+		 * ? relations in a single query, then manually group them.
+		 *
+		 * ? For an example of this approach, refer to the `getNestedComments`
+		 * ? method in this file.
+		 */
+		const queryBuilder = this.blogCommentRepository
+			.createQueryBuilder(EntityName.BLOG_COMMENTS)
+			.where({ blogId, parentId: IsNull() })
+			.leftJoin("blog_comments.user", "user")
+			.leftJoin("user.profile", "userProfile")
+			.leftJoin("blog_comments.children", "childComments")
+			.leftJoin("childComments.user", "childUser")
+			.leftJoin("childUser.profile", "childUserProfile")
+			.leftJoin("childComments.children", "grandChildComments")
+			.leftJoin("grandChildComments.user", "grandChildUser")
+			.leftJoin("grandChildUser.profile", "grandChildUserProfile")
+			.select([
+				"blog_comments.id",
+				"blog_comments.text",
+				"blog_comments.created_at",
+				"user.username",
+				"userProfile.nickname",
+
+				"childComments.id",
+				"childComments.text",
+				"childComments.created_at",
+				"childUser.username",
+				"childUserProfile.nickname",
+
+				"grandChildComments.id",
+				"grandChildComments.text",
+				"grandChildComments.created_at",
+				"grandChildUser.username",
+				"grandChildUserProfile.nickname",
+			])
+			.orderBy("blog_comments.id", "DESC");
+
+		return await paginate(
+			paginationDto,
+			this.blogCommentRepository,
+			queryBuilder,
+			process.env.SERVER_LINK + decodeURI(this.request.url.split("?")[0])
+		);
+	}
+
+	/**
+	 * Retrieve comments and their children comments dynamically
+	 * @param {number} blogId - The Id of the blog that its comments are requested
+	 */
+	async getNestedComments(blogId: number) {
+		/** Retrieve all comment data and their relations */
+		const flatComments = await this.blogCommentRepository.find({
+			where: { blogId },
+			relations: ["user.profile", "children.user.profile"], // Include necessary relations
+			select: {
+				id: true,
+				text: true,
+				created_at: true,
+				parentId: true,
+				user: {
+					username: true,
+					profile: {
+						nickname: true,
+					},
+				},
+				children: {
+					id: true,
+					text: true,
+					created_at: true,
+					parentId: true,
+					user: {
+						username: true,
+						profile: {
+							nickname: true,
+						},
+					},
+				},
+			},
+			order: { id: "DESC" },
+		});
+
+		// Helper function to group comments manually
+		function buildTree(comments, parentId = null) {
+			return comments
+				.filter((comment) => comment.parentId === parentId)
+				.map((comment) => ({
+					...comment,
+					children: buildTree(comments, comment.id),
+				}));
+		}
+
+		const nestedComments = buildTree(flatComments);
+
+		return nestedComments;
 	}
 
 	/**

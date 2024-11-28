@@ -81,8 +81,16 @@ export class BlogController {
 	 */
 	@Get("/by-slug/:slug")
 	// @SkipAuth()
-	findOneBySlug(@Param("slug") slug: string) {
-		return this.blogService.findOneBySlug(slug);
+	findOneBySlug(
+		@Query() paginationDto: PaginationDto,
+		@Param("slug") slug: string
+	) {
+		/** filter client pagination data and remove unwanted data */
+		const filteredPaginationData = plainToClass(PaginationDto, paginationDto, {
+			excludeExtraneousValues: true,
+		});
+
+		return this.blogService.findOneBySlug(slug, filteredPaginationData);
 	}
 
 	/**
