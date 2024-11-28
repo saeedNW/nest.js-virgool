@@ -65,7 +65,7 @@ export async function paginate<T>(
 			.getCount();
 
 		// Apply pagination (skip and limit)
-		queryBuilder.skip(paginationDto.skip).limit(paginationDto.limit);
+		queryBuilder.skip(paginationDto.skip).take(paginationDto.limit);
 
 		// Fetch the paginated items
 		items = await queryBuilder.getMany();
