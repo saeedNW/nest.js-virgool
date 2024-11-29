@@ -17,6 +17,7 @@ export enum AuthMessage {
 }
 
 export enum NotFoundMessage {
+	Image = "This image was not found",
 	Blog = "This blog was not found",
 	Comment = "This comment was not found",
 	Category = "This category was not found",
