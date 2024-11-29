@@ -366,16 +366,20 @@ export class BlogService {
 		);
 
 		/** Check if the blog is liked by the user */
-		const isLiked = !!(await this.blogLikeRepository.findOneBy({
-			userId,
-			blogId: blog.id,
-		}));
+		const isLiked = !userId
+			? false
+			: !!(await this.blogLikeRepository.findOneBy({
+					userId,
+					blogId: blog.id,
+				}));
 
 		/** Check if the blog is bookmarked by the user */
-		const isBookmarked = !!(await this.blogBookmarkRepository.findOneBy({
-			userId,
-			blogId: blog.id,
-		}));
+		const isBookmarked = !userId
+			? false
+			: !!(await this.blogBookmarkRepository.findOneBy({
+					userId,
+					blogId: blog.id,
+				}));
 
 		/** Add like and bookmark status to blog's data */
 		Object.assign(blog, { commentsData, isLiked, isBookmarked });

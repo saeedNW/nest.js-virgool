@@ -80,7 +80,7 @@ export class BlogController {
 	 * Blog bookmark process
 	 */
 	@Get("/by-slug/:slug")
-	// @SkipAuth()
+	@SkipAuth()
 	findOneBySlug(
 		@Query() paginationDto: PaginationDto,
 		@Param("slug") slug: string
