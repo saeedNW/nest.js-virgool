@@ -26,11 +26,13 @@ import { randomInt } from "crypto";
 import { TokenService } from "./tokens.service";
 import { Request, Response } from "express";
 import { CookieKeys } from "src/common/enums/cookies.enum";
-import { TAuthResponse } from "./types/response";
+import { TAuthResponse, TGoogleUser } from "./types/response";
 import { REQUEST } from "@nestjs/core";
 import { tokenCookieOptions } from "src/common/utils/cookie.utils";
 import { SmsIrService } from "../http/sms-ir.service";
 import { MailtrapEmailService } from "../http/mailtrap-email.service";
+import { randomId } from "src/common/utils/functions.utils";
+import { ProfileEntity } from "../user/entities/profile.entity";
 
 @Injectable({ scope: Scope.REQUEST })
 export class AuthService {
@@ -42,6 +44,10 @@ export class AuthService {
 		/** inject otp repository */
 		@InjectRepository(OtpEntity)
 		private otpRepository: Repository<OtpEntity>,
+
+		/** inject profile repository */
+		@InjectRepository(ProfileEntity)
+		private profileRepository: Repository<ProfileEntity>,
 
 		/** make the current request accessible in service  */
 		@Inject(REQUEST)
@@ -367,5 +373,59 @@ export class AuthService {
 
 		/** return user's data */
 		return user;
+	}
+
+	/**
+	 * Handles Google authentication logic.
+	 * @param {TGoogleUser} userData - Object containing user details from Google OAuth.
+	 */
+	async googleAuth(userData: TGoogleUser) {
+		/** Destructure user data */
+		const { email, firstName, lastName } = userData;
+
+		/** Define a variable to save created token */
+		let token: string;
+
+		/** Get user info from database by email */
+		let user = await this.userRepository.findOneBy({ email });
+
+		/**
+		 * Create access token if user exists in data base or
+		 * initialize user creation process if user was not found
+		 */
+		if (user) {
+			/** create access toke */
+			token = this.tokenService.createOtpToken({ userId: user.id });
+		} else {
+			/** Create and instance from user by given data */
+			user = this.userRepository.create({
+				email,
+				verify_email: true,
+				username: email.split("@")["0"] + randomId(),
+			});
+
+			/** Save user's data to database */
+			user = await this.userRepository.save(user);
+
+			/** Create an instance from profile by given data */
+			let profile = this.profileRepository.create({
+				userId: user.id,
+				nickname: `${firstName} ${lastName}`,
+			});
+
+			/** Save profile data to database */
+			profile = await this.profileRepository.save(profile);
+
+			/** Save profile id to user's data */
+			user.profileId = profile.id;
+			await this.userRepository.save(user);
+
+			/** Create access token */
+			token = this.tokenService.createAccessToken({ userId: user.id });
+		}
+
+		return {
+			token,
+		};
 	}
 }

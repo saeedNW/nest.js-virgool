@@ -7,11 +7,19 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { UserEntity } from "../user/entities/user.entity";
 import { OtpEntity } from "../user/entities/otp.entity";
 import { ProfileEntity } from "../user/entities/profile.entity";
+import { GoogleAuthStrategy } from "./strategy/google.strategy";
+import { GoogleAuthController } from "./google.controller";
 
 @Module({
 	imports: [TypeOrmModule.forFeature([UserEntity, OtpEntity, ProfileEntity])],
-	controllers: [AuthController],
-	providers: [AuthService, JwtService, TokenService],
-	exports: [AuthService, JwtService, TokenService, TypeOrmModule],
+	controllers: [AuthController, GoogleAuthController],
+	providers: [AuthService, JwtService, TokenService, GoogleAuthStrategy],
+	exports: [
+		AuthService,
+		JwtService,
+		TokenService,
+		TypeOrmModule,
+		GoogleAuthStrategy,
+	],
 })
 export class AuthModule {}

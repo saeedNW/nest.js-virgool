@@ -35,5 +35,9 @@ namespace NodeJS {
 		EMAIL_HOST: string;
 		EMAIL_USERNAME: string;
 		EMAIL_PASSWORD: string;
+
+		/** Google OAuth client */
+		GOOGLE_CLIENT_ID: string;
+		GOOGLE_CLIENT_SECRET: string;
 	}
 }
