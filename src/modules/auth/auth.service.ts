@@ -191,7 +191,7 @@ export class AuthService {
 		/** Send OTP code to user if application was run in production mode */
 		if (process.env?.NODE_ENV === "production") {
 			if (method === AuthMethod.PHONE) {
-				/** Send SMS to client if the authorization method was phone number */
+				/** Send SMS to client if the authorization method was phone */
 				await this.smsIrService.sendVerificationSms(username, code);
 			} else if (method === AuthMethod.EMAIL) {
 				// TODO: Send EMAIL

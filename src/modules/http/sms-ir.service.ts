@@ -16,7 +16,7 @@ export class SmsIrService {
 	 * @param mobile - User's phone number
 	 * @param code - User's verification code
 	 */
-	async sendVerificationSms(mobile: string, code: string) {
+	async sendVerificationSms(mobile: string, code: string): Promise<void> {
 		/** Create request valid data structure */
 		const data = {
 			mobile,
@@ -36,7 +36,7 @@ export class SmsIrService {
 
 		try {
 			/** Send the request to sms.ir */
-			return await lastValueFrom(
+			await lastValueFrom(
 				this.httpService
 					.post(SMS_IR_SEND_URL, data, {
 						headers,
