@@ -30,5 +30,10 @@ namespace NodeJS {
 		/** SMS.ir */
 		SMS_IR_API_KEY: string;
 		SMS_IR_SEND_URL: string;
+
+		/** Email SMTP info (mailtrap) */
+		EMAIL_HOST: string;
+		EMAIL_USERNAME: string;
+		EMAIL_PASSWORD: string;
 	}
 }

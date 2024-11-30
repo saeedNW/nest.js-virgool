@@ -30,6 +30,7 @@ import { TAuthResponse } from "./types/response";
 import { REQUEST } from "@nestjs/core";
 import { tokenCookieOptions } from "src/common/utils/cookie.utils";
 import { SmsIrService } from "../http/sms-ir.service";
+import { MailtrapEmailService } from "../http/mailtrap-email.service";
 
 @Injectable({ scope: Scope.REQUEST })
 export class AuthService {
@@ -50,7 +51,10 @@ export class AuthService {
 		private tokenService: TokenService,
 
 		/** Register sms service */
-		private smsIrService: SmsIrService
+		private smsIrService: SmsIrService,
+
+		/** Register email service */
+		private mailtrapEmailService: MailtrapEmailService
 	) {}
 
 	/**
@@ -194,7 +198,8 @@ export class AuthService {
 				/** Send SMS to client if the authorization method was phone */
 				await this.smsIrService.sendVerificationSms(username, code);
 			} else if (method === AuthMethod.EMAIL) {
-				// TODO: Send EMAIL
+				/** Send EMAIL to client if the authorization method was email */
+				await this.mailtrapEmailService.sendVerificationEmail(username, code);
 			}
 		}
 	}
