@@ -14,7 +14,6 @@ import { isEmail, isPhoneNumber } from "class-validator";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { UserEntity } from "../user/entities/user.entity";
-import { ProfileEntity } from "../user/entities/profile.entity";
 import {
 	AuthMessage,
 	BadRequestMessage,
@@ -37,10 +36,6 @@ export class AuthService {
 		/** inject user repository */
 		@InjectRepository(UserEntity)
 		private userRepository: Repository<UserEntity>,
-
-		/** inject profile repository */
-		@InjectRepository(ProfileEntity)
-		private profileRepository: Repository<ProfileEntity>,
 
 		/** inject otp repository */
 		@InjectRepository(OtpEntity)
@@ -313,8 +308,6 @@ export class AuthService {
 		if (newOtp) {
 			await this.userRepository.update({ id: userId }, { otpId: otp.id });
 		}
-
-		// TODO: Send OTP code through SMS / Email
 
 		return otp;
 	}
