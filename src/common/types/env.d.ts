@@ -26,5 +26,9 @@ namespace NodeJS {
 		ACCESS_TOKEN_SECRET: string; // JWT access token secret
 		EMAIL_TOKEN_SECRET: string; // JWT email token secret
 		PHONE_TOKEN_SECRET: string; // JWT email token secret
+
+		/** SMS.ir */
+		SMS_IR_API_KEY: string;
+		SMS_IR_SEND_URL: string;
 	}
 }
