@@ -29,6 +29,7 @@ import { CookieKeys } from "src/common/enums/cookies.enum";
 import { TAuthResponse } from "./types/response";
 import { REQUEST } from "@nestjs/core";
 import { tokenCookieOptions } from "src/common/utils/cookie.utils";
+import { SmsIrService } from "../http/sms-ir.service";
 
 @Injectable({ scope: Scope.REQUEST })
 export class AuthService {
@@ -46,7 +47,10 @@ export class AuthService {
 		private request: Request,
 
 		/** Register token service */
-		private tokenService: TokenService
+		private tokenService: TokenService,
+
+		/** Register sms service */
+		private smsIrService: SmsIrService
 	) {}
 
 	/**
@@ -65,11 +69,15 @@ export class AuthService {
 			case AuthType.LOGIN:
 				/** Handel login process */
 				result = await this.login(method, username);
+				/** Send OTP code to the client's phone or email */
+				await this.sendOtp(method, username, result.code);
 				/** send response to client */
 				return await this.sendResponse(res, result);
 			case AuthType.REGISTER:
 				/** Handel register process */
 				result = await this.register(method, username);
+				/** Send OTP code to the client's phone or email */
+				await this.sendOtp(method, username, result.code);
 				/** send response to client */
 				return this.sendResponse(res, result);
 			default:
@@ -171,6 +179,24 @@ export class AuthService {
 		}
 
 		return responseData;
+	}
+
+	/**
+	 * Send OTP code to clients phone number or email address based on auth method
+	 * @param {AuthMethod} method - The method that user used to login [email, phone, username]
+	 * @param {string} username - The input data sent by client which can be a username, email or phone
+	 * @param {string} code - OTP code
+	 */
+	async sendOtp(method: AuthMethod, username: string, code: string) {
+		/** Send OTP code to user if application was run in production mode */
+		if (process.env?.NODE_ENV === "production") {
+			if (method === AuthMethod.PHONE) {
+				/** Send SMS to client if the authorization method was phone number */
+				await this.smsIrService.sendVerificationSms(username, code);
+			} else if (method === AuthMethod.EMAIL) {
+				// TODO: Send EMAIL
+			}
+		}
 	}
 
 	/**
