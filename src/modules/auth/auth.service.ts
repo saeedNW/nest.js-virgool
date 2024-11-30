@@ -161,18 +161,22 @@ export class AuthService {
 		res.cookie(CookieKeys.OTP, token, tokenCookieOptions());
 
 		const responseData = {
-			success: true,
 			message: SuccessMessage.SendOTP,
 		};
 
 		/** add token and to response data if project isn't in production */
 		if (process.env?.NODE_ENV !== "production") {
-			responseData["data"] = { code, token };
+			responseData["code"] = code;
+			responseData["token"] = token;
 		}
 
 		return responseData;
 	}
 
+	/**
+	 * OTP code verification
+	 * @param code - User's OTP code
+	 */
 	async checkOtp(code: string) {
 		/** Extract client's otp token from current request */
 		const token: string | undefined =
