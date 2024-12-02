@@ -56,6 +56,10 @@ This project is a practical implementation of a blog platform inspired by [Virgo
   - [Setting Up Mailtrap.io](#setting-up-mailtrapio)
   - [Updating the `.env` File](#updating-the-env-file)
   - [Compile and run the project](#compile-and-run-the-project)
+  - [Managing Database Migrations](#managing-database-migrations)
+    - [Note](#note)
+    - [Prerequisite](#prerequisite)
+    - [Migration Commands](#migration-commands)
   - [Accessing Swagger UI](#accessing-swagger-ui)
   - [Testing Google OAuth](#testing-google-oauth)
   - [License](#license)
@@ -255,6 +259,48 @@ $ npm run build
 # production mode
 $ npm run start:prod
 ```
+
+## Managing Database Migrations
+
+This project uses TypeORM for database migrations. Follow the steps below to manage migrations effectively:
+
+### Note
+
+The migration system in this project is an example and does not cover every table or feature. It serves as a basic demonstration of how to create and use TypeORM migrations.
+
+### Prerequisite
+
+Before using migrations, ensure that the `synchronize` option is set to `false` in `src/config/typeorm.config.ts`.
+
+### Migration Commands
+
+Below are the scripts for managing database migrations:
+
+- **Run Migrations**: Apply all pending migrations to the database.
+
+  ```bash
+  npm run migration:run
+  ```
+
+- **Revert Migrations**: Roll back the last applied migration.
+
+  ```bash
+  npm run migration:revert
+  ```
+
+- **Generate a New Migration**: Generate a new migration file based on changes in the entity files. Use the `--name` option to specify a name for the migration.
+
+  ```bash
+  npm run migration:generate
+  ```
+
+- **Create a Blank Migration**: Create a blank migration file to manually define changes. Use the `--name` option to specify a name for the migration.
+
+  ```bash
+  npm run migration:create
+  ```
+
+These commands will help you maintain database schema changes consistently across different environments.
 
 ## Accessing Swagger UI
 
