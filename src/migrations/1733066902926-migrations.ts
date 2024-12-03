@@ -211,7 +211,11 @@ export class Migrations1733066902926 implements MigrationInterface {
 		// }
 
 		/**
-		 * ? Migration to change username column properties
+		 * ? Migration to change username column properties using changeColumn method (NOT RECOMMENDED)
+		 * ! DATA LOST WARNING: Don't use this option on a production database
+		 * ! Using `changeColumn` and `new TableColumn` will result in data lost on the updated column
+		 * ! Instead of using this option, You should use `pure SQL queries` such as `ALTER TABLE`
+		 * ! you can find an example of ALTER TABLE after this option
 		 */
 		// const username = await queryRunner.hasColumn(EntityName.USER, "username");
 		// if (username) {
@@ -227,6 +231,13 @@ export class Migrations1733066902926 implements MigrationInterface {
 		// 		})
 		// 	);
 		// }
+
+		/**
+		 * ? Migration to change username column properties using pure SQL (RECOMMENDED)
+		 */
+		// await queryRunner.query(
+			// `ALTER TABLE "user" ALTER COLUMN "username" SET NOT NULL`
+		// );
 
 		/**
 		 * ? Migration to change phone column name to mobile using pure SQL
